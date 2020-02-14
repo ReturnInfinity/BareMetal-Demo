@@ -21,8 +21,8 @@ int main(void)
 	depth = *(uint8_t *)(0x5088);
 
 	//draw a line
-	drawline(0, 0, 700, 700, 0xFF, 0xFF, 0xFF);
-	drawline(0, 0, 700, 100, 0xFF, 0xFF, 0xFF);
+	drawline(0, 0, x_res - 1, y_res - 1, 0xFF, 0xFF, 0xFF);
+	drawline(0, y_res - 1, x_res - 1, 0, 0xFF, 0xFF, 0xFF);
 
 	// draw a square
 	drawline(100, 100, 100, 200, 0xFF, 0xFF, 0xFF);
