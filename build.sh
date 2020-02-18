@@ -9,4 +9,6 @@ gcc -c -m64 -nostdlib -nostartfiles -nodefaultlibs -o helloc.o helloc.c
 ld -T c.ld -o ../bin/helloc.app helloc.o libBareMetal.o
 gcc -c -m64 -nostdlib -nostartfiles -nodefaultlibs -o graphics.o graphics.c
 ld -T c.ld -o ../bin/graphics.app graphics.o
+gcc -c -m64 -nostdlib -nostartfiles -nodefaultlibs -o gavare.o gavare.c
+ld -T c.ld -o ../bin/gavare.app gavare.o
 cd ..
