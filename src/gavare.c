@@ -10,7 +10,7 @@ unsigned char *frame_buffer;
 int offset = 0;
 int X = 1024;
 int Y = 768;
-int A = 3;
+int A = 3; // Anti-alias value, 1 to disable
 
 int J = 0;
 int K = -10;
@@ -30,11 +30,15 @@ int o(int c, int x, int y, int z, int k, int l, int m, int a);
 int n(int e, int f, int g, int h, int i, int j, int d, int a, int b, int V);
 int t(int x, int y, int a, int b);
 int r(int x, int y);
-int s(int y);
 
 int main() {
+	int x, y;
 	frame_buffer = (unsigned char *)((uint64_t)(*(uint32_t *)(0x5080)));
-	s(Y);
+	X = *(uint16_t *)(0x5084);
+	Y = *(uint16_t *)(0x5086);
+	for (y=0; y<Y; y++)
+		for (x=0; x<X; x++)
+			r(x, y); // render each pixel
 }
 
 int F(int b) {
@@ -86,16 +90,10 @@ int t(int x, int y, int a, int b) {
 int r(int x, int y) {
 	R = G = B = 0;
 	t(x, y, 0, 0);
-	if (x < X) {
-		frame_buffer[offset++] = B / A / A; // dump the pixel values straight to video RAM
-		frame_buffer[offset++] = G / A / A;
-		frame_buffer[offset++] = R / A / A;
-		r(x + 1, y);
-	}
+	frame_buffer[offset++] = B / A / A; // dump the pixel values straight to video RAM
+	frame_buffer[offset++] = G / A / A;
+	frame_buffer[offset++] = R / A / A;
 }
 
-int s(int y) {
-	r(0, --y ? s(y), y : y);
-}
 
 // EOF
