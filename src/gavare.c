@@ -1,5 +1,5 @@
-// IOCCC Gavare Ray Trace demo
-// Adapted from https://www.ioccc.org/2004/gavare.c (see https://www.ioccc.org/2004/gavare.hint also)
+// Modified IOCCC Ray Tracer from Anders Gavare
+// https://www.ioccc.org/2004/gavare.c (see https://www.ioccc.org/2004/gavare.hint also)
 
 // gcc -c -m64 -nostdlib -nostartfiles -nodefaultlibs -o gavare.o gavare.c
 // ld -T c.ld -o gavare.app gavare.o
