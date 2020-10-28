@@ -2,8 +2,6 @@
 
 Various test/example programs for BareMetal OS.
 
-[Discord](https://discord.gg/dT8MgXn) - [Website](https://returninfinity.com)
-
 
 ## Prerequisites
 
