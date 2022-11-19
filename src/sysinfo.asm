@@ -14,7 +14,7 @@ start:				; Start of program label
 	mov rsi, startmessage	; Load RSI with memory address of string
 	call output		; Print the string that RSI points to
 
-;Get processor brand string
+; Get processor brand string
 	xor rax, rax
 	mov rdi, tstring
 	mov eax, 0x80000002
@@ -132,7 +132,7 @@ print_cpu_string:
 	mov rsi, kbmsg
 	call output
 
-;CPU features
+; CPU features
 	mov rsi, cpufeatures
 	call output
 	mov rax, 1
@@ -188,7 +188,7 @@ checkavx:
 
 endit:
 
-;RAM
+; RAM
 	mov rsi, memmessage
 	call output
 	xor rax, rax
@@ -201,10 +201,87 @@ endit:
 	mov rsi, mbmsg
 	call output
 
-;Disk
+; Disk
 ;	To be added
 
-;Fin
+; PCI devices
+	mov rsi, pcimessage
+	call output
+	mov edx, 2	;xor edx, edx			; Start with PCI device 0,0
+
+next_pci:
+	push rdx			; Save the PCI device
+
+	mov rcx, pci_read		; PCI read
+	call [b_config]
+	mov ebx, eax			; Save the output to EBX
+
+	cmp eax, 0xFFFFFFFF		; Non-existent device
+	je skip				; Skip if there is no device
+
+	rol eax, 8
+	call dump_al
+	mov rsi, space
+	call output
+	call output
+	call output
+	call output
+	rol eax, 8
+	call dump_al
+	mov rsi, space
+	call output
+	call output
+	call output
+	call output
+	rol eax, 16
+	sub edx, 2
+	call [b_config]
+	rol eax, 16
+	call dump_ax
+	mov rsi, space
+	call output
+	call output
+	rol eax, 16
+	call dump_ax
+	mov rsi, space
+	call output
+	call output
+	add edx, 2
+
+	mov eax, ebx
+	shr eax, 24			; Code in AL
+	shl eax, 5			; Quick multiply by 32
+	mov rsi, pci_classes
+	add rsi, rax
+	call output
+	
+	shr eax, 5
+	cmp al, 01
+	je pci_storage
+	jmp pci_newline
+
+pci_storage:
+	mov eax, ebx
+	shr eax, 16
+	and eax, 0xFF
+	shl eax, 5			; Quick multiply by 32
+	mov rsi, pci_01_subclasses
+	add rsi, rax
+	call output
+
+pci_newline:
+	mov rsi, newline		; Output a newline character
+	call output
+
+skip:
+	pop rdx				; Restore the PCI device
+	add edx, 0x100			; Increment to next device
+	cmp edx, 0xFFFF00
+	jl next_pci
+
+	ret				; Return CPU control to the kernel
+
+; Fin
 	mov rsi, newline
 	call output
 
@@ -251,7 +328,7 @@ string_length:
 
 
 ; -----------------------------------------------------------------------------
-; int_to_string -- Convert a binary interger into an string
+; int_to_string -- Convert a binary integer into an string
 ;  IN:	RAX = binary integer
 ;	RDI = location to store string
 ; OUT:	RDI = points to end of string
@@ -291,6 +368,55 @@ int_to_string_next_digit:
 ; -----------------------------------------------------------------------------
 
 
+; -----------------------------------------------------------------------------
+; dump_(rax|eax|ax|al) -- Dump content of RAX, EAX, AX, or AL
+;  IN:	RAX = content to dump
+; OUT:	Nothing, all registers preserved
+dump_rax:
+	rol rax, 8
+	call dump_al
+	rol rax, 8
+	call dump_al
+	rol rax, 8
+	call dump_al
+	rol rax, 8
+	call dump_al
+	rol rax, 32
+dump_eax:
+	rol eax, 8
+	call dump_al
+	rol eax, 8
+	call dump_al
+	rol eax, 16
+dump_ax:
+	rol ax, 8
+	call dump_al
+	rol ax, 8
+dump_al:
+	push rbx
+	push rax
+	mov rbx, hextable
+	push rax			; Save RAX since we work in 2 parts
+	shr al, 4			; Shift high 4 bits into low 4 bits
+	xlatb
+	mov [tchar+0], al
+	pop rax
+	and al, 0x0f			; Clear the high 4 bits
+	xlatb
+	mov [tchar+1], al
+	push rsi
+	push rcx
+	mov rsi, tchar
+;	mov rcx, 2
+	call output
+	pop rcx
+	pop rsi
+	pop rax
+	pop rbx
+	ret
+; -----------------------------------------------------------------------------
+
+
 startmessage: db 'System Information:' ; String falls through to newline
 newline: db 13, 0
 cpustringmsg: db 'CPU String: ', 0
@@ -313,5 +439,43 @@ sse42: db 'SSE4.2 ', 0
 aes: db 'AES ', 0
 avx: db 'AVX ', 0
 memmessage: db 13, 'RAM: ', 0
+pcimessage: db 13, 'PCI: ', 13, 'Class Subcl Devic Vendr Class Description              Subclass Description', 13, 0
+pci_classes:
+pci_00: db 'Unclassified device            ', 0
+pci_01: db 'Mass storage controller        ', 0
+pci_02: db 'Network controller             ', 0
+pci_03: db 'Display controller             ', 0
+pci_04: db 'Multimedia controller          ', 0
+pci_05: db 'Memory controller              ', 0
+pci_06: db 'Bridge                         ', 0
+pci_07: db 'Communication controller       ', 0
+pci_08: db 'Generic system peripheral      ', 0
+pci_09: db 'Input device controller        ', 0
+pci_0A: db 'Docking station                ', 0
+pci_0B: db 'Processor                      ', 0
+pci_0C: db 'Serial bus controller          ', 0
+pci_0D: db 'Wireless controller            ', 0
+pci_0E: db 'Intelligent controller         ', 0
+pci_0F: db 'Satellite comms controller     ', 0
+pci_10: db 'Encryption controller          ', 0
+pci_11: db 'Signal processing controller   ', 0
+pci_12: db 'Processing accelerators        ', 0
+pci_13: db 'Non-Essential Instrumentation  ', 0
 
+pci_01_subclasses:
+pci_01_00: db 'SCSI storage controller        ', 0
+pci_01_01: db 'IDE interface                  ', 0
+pci_01_02: db 'Floppy disk controller         ', 0
+pci_01_03: db 'IPI bus controller             ', 0
+pci_01_04: db 'RAID bus controller            ', 0
+pci_01_05: db 'ATA controller                 ', 0
+pci_01_06: db 'SATA controller                ', 0
+pci_01_07: db 'Serial Attached SCSI controller', 0
+pci_01_08: db 'Non-Volatile memory controller ', 0
+
+pci_blank: db '                               ', 0
+
+hextable: db '0123456789ABCDEF'
+tchar: db 0, 0, 0
+space: db ' ', 0
 tstring: times 50 db 0
