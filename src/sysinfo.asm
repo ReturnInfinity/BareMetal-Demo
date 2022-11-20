@@ -201,8 +201,44 @@ endit:
 	mov rsi, mbmsg
 	call output
 
-; Disk
-;	To be added
+; Storage
+	mov rsi, stomessage
+	call output
+
+check_ahci:
+	mov rsi, ahcimessage
+	call output
+	cmp byte [0x110000 + 795], 1
+	je ahci_enabled
+	mov rsi, dismessage
+	call output
+	jmp check_nvme
+ahci_enabled:
+	mov rsi, enmessage
+	call output	
+
+check_nvme:
+	mov rsi, nvmemessage
+	call output
+	cmp byte [0x110000 + 794], 1
+	je nvme_enabled
+	mov rsi, dismessage
+	call output
+	jmp stoend
+nvme_enabled:
+	mov rsi, enmessage
+	call output
+	mov rsi, space
+	call output
+	mov rsi, quote
+	call output
+	mov rsi, 0x174000
+	mov rcx, 71
+	call [b_output]
+	mov rsi, quote
+	call output
+
+stoend:
 
 ; PCI devices
 	mov rsi, pcimessage
@@ -407,7 +443,6 @@ dump_al:
 	push rsi
 	push rcx
 	mov rsi, tchar
-;	mov rcx, 2
 	call output
 	pop rcx
 	pop rsi
@@ -419,6 +454,7 @@ dump_al:
 
 startmessage: db 'System Information:' ; String falls through to newline
 newline: db 13, 0
+quote: db '"', 0
 cpustringmsg: db 'CPU String: ', 0
 numcoresmsg: db 13, 'Number of cores: ', 0
 speedmsg: db 13, 'Detected speed: ', 0
@@ -439,7 +475,12 @@ sse42: db 'SSE4.2 ', 0
 aes: db 'AES ', 0
 avx: db 'AVX ', 0
 memmessage: db 13, 'RAM: ', 0
-pcimessage: db 13, 'PCI: ', 13, 'Class Subcl Devic Vendr Class Description              Subclass Description', 13, 0
+stomessage: db 13, 'Storage:', 0
+ahcimessage: db 13, 'AHCI - ', 0
+nvmemessage: db 13, 'NVMe - ', 0
+dismessage: db 'Disabled', 0
+enmessage: db 'Enabled', 0
+pcimessage: db 13, 'PCI:', 13, 'Class Subcl Devic Vendr Class Description              Subclass Description', 13, 0
 pci_classes:
 pci_00: db 'Unclassified device            ', 0
 pci_01: db 'Mass storage controller        ', 0
