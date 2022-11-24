@@ -46,16 +46,72 @@ ethtest_receiver:
 	call [b_output]
 	mov rdi, buffer
 	call [b_net_rx]
+
 	mov rsi, buffer
-	mov rcx, 14
-ethtest_receiver_next:	
+	mov rcx, 6
+ethtest_receiver_dest:	
 	lodsb
 	call dump_al
 	sub rcx, 1
 	cmp rcx, 0
-	jne ethtest_receiver_next
+	jne ethtest_receiver_dest
+	push rsi
+	mov rsi, space
+	mov rcx, 1
+	call [b_output]
+	pop rsi
+
+	mov rcx, 6
+ethtest_receiver_src:
+	lodsb
+	call dump_al
+	sub rcx, 1
+	cmp rcx, 0
+	jne ethtest_receiver_src
+	push rsi
+	mov rsi, space
+	mov rcx, 1
+	call [b_output]
+	pop rsi
+
+ethtest_receiver_type:
+	lodsb
+	mov bl, al
+	shl bx, 8
+	call dump_al
+	lodsb
+	mov bl, al
+	call dump_al
+	push rsi
+	mov rsi, space
+	mov rcx, 1
+	call [b_output]
+	pop rsi
+	cmp bx, 0x0806
+	je ethtest_receiver_arp
+	cmp bx, 0x0800
+	je ethtest_receiver_ipv4
+	cmp bx, 0x86DD
+	je ethtest_receiver_ipv6
 	jmp ethtest
 
+ethtest_receiver_arp:
+	mov rsi, strARP
+	mov rcx, 4
+	call [b_output]
+	jmp ethtest
+
+ethtest_receiver_ipv4:
+	mov rsi, strIPv4
+	mov rcx, 4
+	call [b_output]
+	jmp ethtest
+
+ethtest_receiver_ipv6:
+	mov rsi, strIPv6
+	mov rcx, 4
+	call [b_output]
+	jmp ethtest
 
 ; -----------------------------------------------------------------------------
 ; dump_al -- Dump content of AL
@@ -86,9 +142,13 @@ dump_al:
 
 hextable: db '0123456789ABCDEF'
 startstring: db 'EthTest: S to send a packet, Q to quit.', 10, 'Received packets will display automatically'
+space: db ' '
 newline: db 10
 sendstring: db 10, 'Sending packet.'
 receivestring: db 10, 'Received packet:', 10
+strIPv4: db 'IPv4'
+strARP: db 'ARP '
+strIPv6: db 'IPv6'
 tchar: db 0, 0, 0
 
 align 16
