@@ -1,3 +1,6 @@
 .DS_Store
 bin/*
-src/api/*
+src/libBareMetal.asm
+src/libBareMetal.c
+src/libBareMetal.h
+src/*.o
