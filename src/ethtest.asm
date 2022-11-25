@@ -10,6 +10,17 @@ start:
 	mov rcx, 83
 	call [b_output]
 
+	; Get the host MAC
+	mov rax, [0x110050]		; TODO Get from kernel properly
+	mov rdi, source
+	mov rcx, 6
+srcmacnext:
+	stosb
+	shr rax, 8
+	sub rcx, 1
+	cmp rcx, 0
+	jne srcmacnext
+
 	; Configure the function to run on network activity
 	mov rax, ethtest_receiver
 	mov rcx, networkcallback_set
@@ -145,7 +156,7 @@ startstring: db 'EthTest: S to send a packet, Q to quit.', 10, 'Received packets
 space: db ' '
 newline: db 10
 sendstring: db 10, 'Sending packet.'
-receivestring: db 10, 'Received packet:', 10
+receivestring: db 10, 'Received packet: '
 strIPv4: db 'IPv4'
 strARP: db 'ARP '
 strIPv6: db 'IPv6'
@@ -157,7 +168,7 @@ packet:
 destination: db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 source: db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 type: db 0xAB, 0xBA
-data: db 'This is test data from EthTool for BareMetal'
+data: db 'This is test data from EthTest for BareMetal'
 
 align 16
 
