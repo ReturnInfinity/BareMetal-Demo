@@ -1,30 +1,61 @@
-; Counter Program (v1.0, January 30 2020)
+; https://projecteuler.net/problem=1
+; v1.0, February 5 2023
 ; Written by Ian Seyler
 ;
 ; BareMetal compile:
-; nasm counter.asm -o counter.app
+; nasm euler1.asm -o euler1.app
 
 [BITS 64]
 [ORG 0x0000000000200000]
 
 %INCLUDE "libBareMetal.asm"
 
-start:				; Start of program label
+start:					; Start of program label
 
-	xor rax, rax
+loop:
+	; Check if RDX is divisible by 3
+	mov rax, qword [counter]	; Copy counter to RAX for division
+	xor rdx, rdx			; Zero out RDX for division
+	mov rcx, 3
+	div rcx				; Divide RDX:RAX by 3, the result is in RAX, the remainder in RDX
+	cmp rdx, 0			; Compare the remainder with 0
+	jne check_5			; If not divisible by 3, jump to check_5
+	mov rax, qword [counter]
+	add qword [sum], rax
+	jmp add_counter			; Jump to add_counter
 
-next:
+	; Check if RDX is divisible by 5
+check_5:
+	mov rax, qword [counter]	; Copy RDX to RAX for division
+	xor rdx, rdx			; Zero out RDX for division
+	mov rcx, 5
+	div rcx				; Divide RDX:RAX by 5, the result is in RAX, the remainder in RDX
+	cmp rdx, 0			; Compare the remainder with 0
+	jne add_counter			; If not divisible by 5, jump to add_counter
+	mov rax, qword [counter]
+	add qword [sum], rax
+
+	; Add 1 to the counter and check if it's less than 1000
+add_counter:
+	add qword [counter], 1		; Increment the counter
+	cmp qword [counter], 1000	; Compare the counter with 1000
+	jl loop				; If less, jump to loop
+
+	mov rsi, message
+	call output
 	mov rdi, tstring
 	mov rsi, rdi
-	call int_to_string
+	mov rax, qword [sum]		; Copy sum to RAX
+	call int_to_string		; Convert value to RAX to string in [RDI]
 	call output
-	add rax, 1
 	mov rsi, newline
 	call output
-	jmp next
 
 ret				; Return to OS
 
+message: db 'Sum of multiples of 3 or 5 below 1000: ', 0
+sum: dq 0
+counter: dq 1
 
 ; -----------------------------------------------------------------------------
 ; output -- Displays text
@@ -66,7 +97,7 @@ string_length:
 
 
 ; -----------------------------------------------------------------------------
-; int_to_string -- Convert a binary interger into an string
+; int_to_string -- Convert a binary integer into an string
 ;  IN:	RAX = binary integer
 ;	RDI = location to store string
 ; OUT:	RDI = points to end of string

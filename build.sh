@@ -3,7 +3,7 @@
 cd src
 nasm hello.asm -o ../bin/hello.app -l ../bin/hello-debug.txt
 nasm sysinfo.asm -o ../bin/sysinfo.app -l ../bin/sysinfo-debug.txt
-nasm counter.asm -o ../bin/counter.app
+nasm euler1.asm -o ../bin/euler1.app
 nasm ethtest.asm -o ../bin/ethtest.app
 if [ "$(uname)" != "Darwin" ]; then
 	gcc -c -m64 -nostdlib -nostartfiles -nodefaultlibs -o libBareMetal.o libBareMetal.c
