@@ -255,15 +255,23 @@ next_pci:
 	cmp eax, 0xFFFFFFFF		; Non-existent device
 	je skip				; Skip if there is no device
 
+	push rax			; Save the Class Code
+	mov eax, edx
+	shr eax, 8
+	call dump_ax			; Display Bus/Device/Function
+	pop rax
+	mov rsi, space
+	call output
+	call output
 	rol eax, 8
-	call dump_al
+	call dump_al			; Display Class
 	mov rsi, space
 	call output
 	call output
 	call output
 	call output
 	rol eax, 8
-	call dump_al
+	call dump_al			; Display Subclass
 	mov rsi, space
 	call output
 	call output
@@ -273,12 +281,12 @@ next_pci:
 	sub edx, 2
 	call [b_config]
 	rol eax, 16
-	call dump_ax
+	call dump_ax			; Display Device ID
 	mov rsi, space
 	call output
 	call output
 	rol eax, 16
-	call dump_ax
+	call dump_ax			; Display Vendor ID
 	mov rsi, space
 	call output
 	call output
@@ -289,7 +297,7 @@ next_pci:
 	shl eax, 5			; Quick multiply by 32
 	mov rsi, pci_classes
 	add rsi, rax
-	call output
+	call output			; Display Description
 	
 	shr eax, 5
 	cmp al, 01
@@ -480,7 +488,7 @@ ahcimessage: db 13, 'AHCI - ', 0
 nvmemessage: db 13, 'NVMe - ', 0
 dismessage: db 'Disabled', 0
 enmessage: db 'Enabled', 0
-pcimessage: db 13, 'PCI:', 13, 'Class Subcl Devic Vendr Class Description              Subclass Description', 13, 0
+pcimessage: db 13, 'PCI:', 13, 'BDF   Class Subcl Devic Vendr Class Description              Subclass Description', 13, 0
 pci_classes:
 pci_00: db 'Unclassified device            ', 0
 pci_01: db 'Mass storage controller        ', 0
