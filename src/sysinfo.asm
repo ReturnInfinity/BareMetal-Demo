@@ -5,7 +5,7 @@
 ; nasm sysinfo.asm -o sysinfo.app
 
 [BITS 64]
-[ORG 0x0000000000200000]
+[ORG 0xFFFF800000000000]
 
 %INCLUDE "libBareMetal.asm"
 
