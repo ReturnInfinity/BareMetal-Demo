@@ -437,25 +437,26 @@ dump_ax:
 	call dump_al
 	rol ax, 8
 dump_al:
+	push rdi
 	push rbx
 	push rax
 	mov rbx, hextable
+	mov rdi, tchar
 	push rax			; Save RAX since we work in 2 parts
 	shr al, 4			; Shift high 4 bits into low 4 bits
 	xlatb
-	mov [tchar+0], al
+	stosb
 	pop rax
 	and al, 0x0f			; Clear the high 4 bits
 	xlatb
-	mov [tchar+1], al
+	stosb
 	push rsi
-	push rcx
 	mov rsi, tchar
 	call output
-	pop rcx
 	pop rsi
 	pop rax
 	pop rbx
+	pop rdi
 	ret
 ; -----------------------------------------------------------------------------
 
