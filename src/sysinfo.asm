@@ -5,7 +5,7 @@
 ; nasm sysinfo.asm -o sysinfo.app
 
 [BITS 64]
-[ORG 0x0000000000200000]
+[ORG 0xFFFF800000000000]
 
 %INCLUDE "libBareMetal.asm"
 
@@ -302,16 +302,47 @@ next_pci:
 	shr eax, 5
 	cmp al, 01
 	je pci_storage
+	cmp al, 02
+	je pci_network
+	cmp al, 03
+	je pci_display
 	jmp pci_newline
 
 pci_storage:
 	mov eax, ebx
 	shr eax, 16
 	and eax, 0xFF
+	cmp al, 8
+	jg pci_newline
 	shl eax, 5			; Quick multiply by 32
 	mov rsi, pci_01_subclasses
 	add rsi, rax
 	call output
+	jmp pci_newline
+
+pci_network:
+	mov eax, ebx
+	shr eax, 16
+	and eax, 0xFF
+	cmp al, 0
+	jg pci_newline
+	shl eax, 5			; Quick multiply by 32
+	mov rsi, pci_02_subclasses
+	add rsi, rax
+	call output
+	jmp pci_newline
+
+pci_display:
+	mov eax, ebx
+	shr eax, 16
+	and eax, 0xFF
+	cmp al, 2
+	jg pci_newline
+	shl eax, 5			; Quick multiply by 32
+	mov rsi, pci_03_subclasses
+	add rsi, rax
+	call output
+	jmp pci_newline
 
 pci_newline:
 	mov rsi, newline		; Output a newline character
@@ -437,25 +468,26 @@ dump_ax:
 	call dump_al
 	rol ax, 8
 dump_al:
+	push rdi
 	push rbx
 	push rax
 	mov rbx, hextable
+	mov rdi, tchar
 	push rax			; Save RAX since we work in 2 parts
 	shr al, 4			; Shift high 4 bits into low 4 bits
 	xlatb
-	mov [tchar+0], al
+	stosb
 	pop rax
 	and al, 0x0f			; Clear the high 4 bits
 	xlatb
-	mov [tchar+1], al
+	stosb
 	push rsi
-	push rcx
 	mov rsi, tchar
 	call output
-	pop rcx
 	pop rsi
 	pop rax
 	pop rbx
+	pop rdi
 	ret
 ; -----------------------------------------------------------------------------
 
@@ -521,6 +553,14 @@ pci_01_05: db 'ATA controller                 ', 0
 pci_01_06: db 'SATA controller                ', 0
 pci_01_07: db 'Serial Attached SCSI controller', 0
 pci_01_08: db 'Non-Volatile memory controller ', 0
+
+pci_02_subclasses:
+pci_02_00: db 'Ethernet controller            ', 0
+
+pci_03_subclasses:
+pci_03_00: db 'VGA compatible controller      ', 0
+pci_03_01: db 'XGA compatible controller      ', 0
+pci_03_02: db '3D controller                  ', 0
 
 pci_blank: db '                               ', 0
 

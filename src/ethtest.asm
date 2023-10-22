@@ -1,7 +1,11 @@
-; ethtest.asm -- Test the sending/receiving of Ethernet packets
+; Ethernet Test Program (v1.0, November 17 2023)
+; Written by Ian Seyler
+;
+; BareMetal compile:
+; nasm ethtest.asm -o ethtest.app
 
 [BITS 64]
-[ORG 0x0000000000200000]
+[ORG 0xFFFF800000000000]
 
 %include 'libBareMetal.asm'
 

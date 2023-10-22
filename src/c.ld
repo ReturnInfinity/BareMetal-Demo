@@ -3,7 +3,7 @@ OUTPUT_ARCH("i386:x86-64")
 ENTRY(main)
 SECTIONS
 {
-	. = 0x0000000000200000;
+	. = 0xFFFF800000000000;
 	.text : {
 		*(.text)
 		. = ALIGN(16);

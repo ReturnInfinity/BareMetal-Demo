@@ -1,12 +1,11 @@
-; https://projecteuler.net/problem=1
-; v1.0, February 5 2023
+; https://projecteuler.net/problem=1 - v1.0, February 5 2023
 ; Written by Ian Seyler
 ;
 ; BareMetal compile:
 ; nasm euler1.asm -o euler1.app
 
 [BITS 64]
-[ORG 0x0000000000200000]
+[ORG 0xFFFF800000000000]
 
 %INCLUDE "libBareMetal.asm"
 
