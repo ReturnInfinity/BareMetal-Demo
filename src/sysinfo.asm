@@ -246,7 +246,7 @@ check_ata:
 	mov rsi, dismessage
 	call output
 	jmp stoend
-ahci_enabled:
+ata_enabled:
 	mov rsi, enmessage
 	call output	
 
