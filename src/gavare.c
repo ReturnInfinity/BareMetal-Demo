@@ -10,6 +10,7 @@ unsigned char *frame_buffer;
 int offset = 0;
 int X = 1024;
 int Y = 768;
+int BPP = 32;
 int A = 3; // Anti-alias value, 1 to disable
 
 int J = 0;
@@ -36,6 +37,7 @@ int main() {
 	frame_buffer = (unsigned char *)((uint64_t)(*(uint32_t *)(0x5080)));
 	X = *(uint16_t *)(0x5084);
 	Y = *(uint16_t *)(0x5086);
+	BPP = *(uint8_t *)(0x5088);
 	for (y=0; y<Y; y++)
 		for (x=0; x<X; x++)
 			r(x, y); // render each pixel
@@ -90,9 +92,13 @@ int t(int x, int y, int a, int b) {
 int r(int x, int y) {
 	R = G = B = 0;
 	t(x, y, 0, 0);
+
 	frame_buffer[offset++] = B / A / A; // dump the pixel values straight to video RAM
 	frame_buffer[offset++] = G / A / A;
 	frame_buffer[offset++] = R / A / A;
+	if (BPP == 32) {
+		frame_buffer[offset++] = 0;
+	}
 }
 
 
