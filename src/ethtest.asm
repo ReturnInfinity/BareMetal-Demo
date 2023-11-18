@@ -11,7 +11,7 @@
 
 start:
 	mov rsi, startstring
-	mov rcx, 83
+	mov rcx, 89
 	call [b_output]
 
 	; Get the host MAC
@@ -133,30 +133,40 @@ ethtest_receiver_ipv6:
 ;  IN:	AL = content to dump
 ; OUT:	Nothing, all registers preserved
 dump_al:
-	push rbx
-	push rax
-	mov rbx, hextable
-	push rax			; Save RAX since we work in 2 parts
-	shr al, 4			; Shift high 4 bits into low 4 bits
-	xlatb
-	mov [tchar+0], al
-	pop rax
-	and al, 0x0f			; Clear the high 4 bits
-	xlatb
-	mov [tchar+1], al
 	push rsi
 	push rcx
-	mov rcx, 2
+	push rbx
+	push rax
+
 	mov rsi, tchar
+	mov rcx, 2
+dump_al_next_nibble:
+	rol al, 4
+	mov bl, al
+	and bl, 0x0F			; Isolate low nibble
+	add bl, 0x30			; Convert to ASCII value starting at '0'
+	cmp bl, 0x39			; Check if it is above '9'
+	jna dump_al_not_AF
+	add bl, 7			; Add offset to 'A'
+dump_al_not_AF:
+	mov [rsi], byte bl		; Store the character
+	add rsi, 1
+	dec rcx
+	jnz dump_al_next_nibble
+
+	mov rsi, tchar
+	mov rcx, 2
 	call [b_output]
-	pop rcx
-	pop rsi
+
 	pop rax
 	pop rbx
+	pop rcx
+	pop rsi
 	ret
+; -----------------------------------------------------------------------------
 
-hextable: db '0123456789ABCDEF'
-startstring: db 'EthTest: S to send a packet, Q to quit.', 10, 'Received packets will display automatically'
+
+startstring: db 'EthTest: Press S to send a packet, Q to quit.', 10, 'Received packets will display automatically'
 space: db ' '
 newline: db 10
 sendstring: db 10, 'Sending packet.'
