@@ -208,7 +208,7 @@ endit:
 check_nvme:
 	mov rsi, nvmemessage
 	call output
-	cmp byte [0x110000 + 794], 1
+	cmp byte [0x110000 + 526], 1
 	je nvme_enabled
 	mov rsi, dismessage
 	call output
@@ -229,7 +229,7 @@ nvme_enabled:
 check_ahci:
 	mov rsi, ahcimessage
 	call output
-	cmp byte [0x110000 + 795], 1
+	cmp byte [0x110000 + 526], 2
 	je ahci_enabled
 	mov rsi, dismessage
 	call output
@@ -241,7 +241,7 @@ ahci_enabled:
 check_ata:
 	mov rsi, atamessage
 	call output
-	cmp byte [0x110000 + 796], 1
+	cmp byte [0x110000 + 526], 4
 	je ata_enabled
 	mov rsi, dismessage
 	call output
