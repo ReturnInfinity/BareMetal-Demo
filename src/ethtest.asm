@@ -44,6 +44,9 @@ ethtest_finish:
 	mov rax, 0
 	mov rcx, networkcallback_set
 	call [b_config]
+	mov rsi, newline
+	mov rcx, 1
+	call [b_output]
 	ret				; Return CPU control to the kernel
 
 ethtest_send:
