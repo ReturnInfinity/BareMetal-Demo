@@ -23,10 +23,11 @@ startloop:
 	cmp rdx, 256			; Set a maximum of 256 CPUs
 	jne startloop
 	call smp_task			; Call the code on this CPU as well
-	; TODO - Wait for all other CPUs to finish instead of a delay
-	mov rcx, delay
-	mov rax, 320			; 4 seconds
+startwait:
+	mov rcx, smp_busy
 	call [b_system]
+	cmp al, 0
+	jne startwait
 	ret
 
 ; This code will be executed on every available CPU in the system
