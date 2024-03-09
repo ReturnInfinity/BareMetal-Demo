@@ -252,60 +252,49 @@ ata_enabled:
 
 stoend:
 
-; PCI devices
+; Bus devices
 	mov rsi, pcimessage
 	call output
-	mov edx, 2	;xor edx, edx			; Start with PCI device 0,0
-
-next_pci:
-	push rdx			; Save the PCI device
-
-	mov rcx, pci_read		; PCI read
-	call [b_config]
-	mov ebx, eax			; Save the output to EBX
-
-	cmp eax, 0xFFFFFFFF		; Non-existent device
-	je skip				; Skip if there is no device
-
-	push rax			; Save the Class Code
-	mov eax, edx
-	shr eax, 8
-	call dump_ax			; Display Bus/Device/Function
-	pop rax
+	mov rsi, 0x120000		; Bus Table
+next_device:
+	lodsq				; Load first 8 bytes of record
+	cmp ax, 0xFFFF			; End of records?
+	je end
+	push rsi
+	call dump_ax			; PCIe Segment
 	mov rsi, space
 	call output
-	call output
-	rol eax, 8
-	call dump_al			; Display Class
+	ror rax, 24
+	call dump_al			; Bus
 	mov rsi, space
 	call output
-	call output
-	call output
-	call output
-	rol eax, 8
-	call dump_al			; Display Subclass
+	rol rax, 8
+	call dump_al			; DF
 	mov rsi, space
 	call output
-	call output
-	call output
-	call output
-	rol eax, 16
-	sub edx, 2
-	call [b_config]
-	rol eax, 16
-	call dump_ax			; Display Device ID
+	ror rax, 16
+	call dump_ax			; Vendor
 	mov rsi, space
 	call output
-	call output
-	rol eax, 16
-	call dump_ax			; Display Vendor ID
+	ror rax, 16
+	call dump_ax			; Device
 	mov rsi, space
 	call output
+	pop rsi
+	lodsq				; Load last 8 bytes of record
+	mov rbx, rax			; Save the value for displaying the descriptions later
+	push rsi
+	ror rax, 8
+	call dump_al			; Class
+	mov rsi, space
 	call output
-	add edx, 2
+	rol rax, 16
+	call dump_al			; Subclass
+	mov rsi, space
+	call output
 
 	mov eax, ebx
-	shr eax, 24			; Code in AL
+	shr eax, 8			; Code in AL
 	shl eax, 5			; Quick multiply by 32
 	mov rsi, pci_classes
 	add rsi, rax
@@ -318,11 +307,12 @@ next_pci:
 	je pci_network
 	cmp al, 03
 	je pci_display
+	mov rsi, pci_blank
+	call output
 	jmp pci_newline
 
 pci_storage:
 	mov eax, ebx
-	shr eax, 16
 	and eax, 0xFF
 	cmp al, 8
 	jg pci_newline
@@ -357,22 +347,19 @@ pci_display:
 	jmp pci_newline
 
 pci_newline:
+	mov rax, rbx
+	ror rax, 56
+	call dump_al
 	mov rsi, newline		; Output a newline character
 	call output
+	pop rsi
 
 skip:
-	pop rdx				; Restore the PCI device
-	add edx, 0x100			; Increment to next device
-	cmp edx, 0xFFFF00
-	jl next_pci
-
-	ret				; Return CPU control to the kernel
+	jmp next_device
 
 ; Fin
-	mov rsi, newline
-	call output
-
-ret				; Return to OS
+end:
+	ret				; Return to caller
 
 
 ; -----------------------------------------------------------------------------
@@ -533,7 +520,7 @@ ahcimessage: db 13, 'AHCI - ', 0
 atamessage: db 13, 'ATA  - ', 0
 dismessage: db 'Disabled', 0
 enmessage: db 'Enabled', 0
-pcimessage: db 13, 'PCI:', 13, 'BDF   Class Subcl Devic Vendr Class Description              Subclass Description', 13, 0
+pcimessage: db 13, 'Bus:', 13, 'Seg  BS DF Vend Dvce CL SC Class Description              Subclass Description           EN', 13, 0
 pci_classes:
 pci_00: db 'Unclassified device            ', 0
 pci_01: db 'Mass storage controller        ', 0
