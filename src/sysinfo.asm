@@ -208,7 +208,7 @@ endit:
 check_nvme:
 	mov rsi, nvmemessage
 	call output
-	cmp byte [0x110000 + 0x0208], 1
+	cmp byte [0x110000 + 0x0208], 1	; Bit 0 set for NVMe
 	je nvme_enabled
 	mov rsi, dismessage
 	call output
@@ -229,7 +229,7 @@ nvme_enabled:
 check_ahci:
 	mov rsi, ahcimessage
 	call output
-	cmp byte [0x110000 + 0x0208], 2
+	cmp byte [0x110000 + 0x0208], 2	; Bit 1 set for AHCI
 	je ahci_enabled
 	mov rsi, dismessage
 	call output
@@ -241,7 +241,7 @@ ahci_enabled:
 check_ata:
 	mov rsi, atamessage
 	call output
-	cmp byte [0x110000 + 0x0208], 4
+	cmp byte [0x110000 + 0x0208], 4	; Bit 3 set for ATA
 	je ata_enabled
 	mov rsi, dismessage
 	call output
@@ -253,7 +253,7 @@ ata_enabled:
 stoend:
 
 ; Bus devices
-	mov rsi, pcimessage
+	mov rsi, busmessage
 	call output
 	mov rsi, 0x120000		; Bus Table
 next_device:
@@ -269,7 +269,7 @@ next_device:
 	mov rsi, space
 	call output
 	rol rax, 8
-	call dump_al			; DF
+	call dump_al			; DF (Device/Slot and Function)
 	mov rsi, space
 	call output
 	ror rax, 16
@@ -520,7 +520,7 @@ ahcimessage: db 13, 'AHCI - ', 0
 atamessage: db 13, 'ATA  - ', 0
 dismessage: db 'Disabled', 0
 enmessage: db 'Enabled', 0
-pcimessage: db 13, 'Bus:', 13, 'Seg  BS DF Vend Dvce CL SC Class Description              Subclass Description           EN', 13, 0
+busmessage: db 13, 'Bus:', 13, 'Seg  BS DF Vend Dvce CL SC Class Description              Subclass Description           EN', 13, 0
 pci_classes:
 pci_00: db 'Unclassified device            ', 0
 pci_01: db 'Mass storage controller        ', 0
