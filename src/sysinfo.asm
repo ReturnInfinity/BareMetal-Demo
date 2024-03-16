@@ -288,7 +288,7 @@ next_device:
 	call dump_al			; Class
 	mov rsi, space
 	call output
-	rol rax, 8			; Rotate RAX so Sublcass is in AL
+	rol rax, 8			; Rotate RAX so Subclass is in AL
 	call dump_al			; Subclass
 	mov rsi, space
 	call output
