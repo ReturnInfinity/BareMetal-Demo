@@ -284,11 +284,11 @@ next_device:
 	lodsq				; Load last 8 bytes of record
 	mov rbx, rax			; Save the value for displaying the descriptions later
 	push rsi
-	ror rax, 8
+	ror rax, 8			; Rotate RAX so Class is in AL
 	call dump_al			; Class
 	mov rsi, space
 	call output
-	rol rax, 16
+	rol rax, 8			; Rotate RAX so Sublcass is in AL
 	call dump_al			; Subclass
 	mov rsi, space
 	call output
