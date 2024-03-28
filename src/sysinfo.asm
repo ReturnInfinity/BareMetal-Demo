@@ -257,7 +257,7 @@ check_virtio_blk:
 	je virtioblk_enabled
 	mov rsi, dismessage
 	call output
-	jmp check_ahci
+	jmp stoend
 virtioblk_enabled:
 	mov rsi, enmessage
 	call output
