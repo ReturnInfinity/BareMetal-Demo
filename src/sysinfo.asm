@@ -236,7 +236,7 @@ check_ahci:
 	jmp check_ata
 ahci_enabled:
 	mov rsi, enmessage
-	call output	
+	call output
 
 check_ata:
 	mov rsi, atamessage
@@ -245,10 +245,22 @@ check_ata:
 	je ata_enabled
 	mov rsi, dismessage
 	call output
-	jmp stoend
+	jmp check_virtio_blk
 ata_enabled:
 	mov rsi, enmessage
-	call output	
+	call output
+
+check_virtio_blk:
+	mov rsi, virtioblkmessage
+	call output
+	cmp byte [0x110000 + 0x0208], 8	; Bit 4 set for NVMe
+	je virtioblk_enabled
+	mov rsi, dismessage
+	call output
+	jmp check_ahci
+virtioblk_enabled:
+	mov rsi, enmessage
+	call output
 
 stoend:
 
@@ -518,6 +530,7 @@ stomessage: db 13, 'Storage:', 0
 nvmemessage: db 13, 'NVMe - ', 0
 ahcimessage: db 13, 'AHCI - ', 0
 atamessage: db 13, 'ATA  - ', 0
+virtioblkmessage: db 13, 'Virt - ', 0
 dismessage: db 'Disabled', 0
 enmessage: db 'Enabled', 0
 busmessage: db 13, 'Bus:', 13, 'Seg  BS DF Vend Dvce CL SC Class Description              Subclass Description           EN', 13, 0
