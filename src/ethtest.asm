@@ -15,7 +15,7 @@ start:
 	call [b_output]
 
 	; Get the host MAC
-	mov rax, [0x110050]		; TODO Get from kernel properly
+	mov rax, [0x110048]		; TODO Get from kernel properly
 	mov rdi, source
 	mov rcx, 6
 srcmacnext:
