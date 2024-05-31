@@ -25,12 +25,12 @@ srcmacnext:
 	cmp rcx, 0
 	jne srcmacnext
 
-	; Configure the function to run on network activity
-	mov rax, ethtest_receiver
-	mov rcx, networkcallback_set
-	call [b_config]
-
+; Main program loop
 ethtest:
+	mov rdi, buffer
+	call [b_net_rx]
+	cmp cx, 0
+	jne ethtest_receive
 	call [b_input]
 	or al, 00100000b		; Convert to lowercase
 
@@ -41,9 +41,6 @@ ethtest:
 	jmp ethtest
 
 ethtest_finish:
-	mov rax, 0
-	mov rcx, networkcallback_set
-	call [b_config]
 	mov rsi, newline
 	mov rcx, 1
 	call [b_output]
@@ -58,14 +55,13 @@ ethtest_send:
 	call [b_net_tx]
 	jmp ethtest
 
-ethtest_receiver:
+ethtest_receive:
 	mov rsi, receivestring
 	mov rcx, 18
 	call [b_output]
-	mov rdi, buffer
-	call [b_net_rx]
-
 	mov rsi, buffer
+
+; Output the destination MAC
 	mov rcx, 6
 ethtest_receiver_dest:	
 	lodsb
@@ -79,6 +75,7 @@ ethtest_receiver_dest:
 	call [b_output]
 	pop rsi
 
+; Output the source MAC
 	mov rcx, 6
 ethtest_receiver_src:
 	lodsb
@@ -92,6 +89,7 @@ ethtest_receiver_src:
 	call [b_output]
 	pop rsi
 
+; Output the EtherType
 ethtest_receiver_type:
 	lodsb
 	mov bl, al
