@@ -273,6 +273,8 @@ next_device:
 	cmp ax, 0xFFFF			; End of records?
 	je end
 	push rsi
+	mov rsi, newline
+	call output
 	call dump_ax			; PCIe Segment
 	mov rsi, space
 	call output
@@ -362,8 +364,6 @@ pci_newline:
 	mov rax, rbx
 	ror rax, 56
 	call dump_al
-	mov rsi, newline		; Output a newline character
-	call output
 	pop rsi
 
 skip:
@@ -503,7 +503,7 @@ dump_al:
 ; -----------------------------------------------------------------------------
 
 
-startmessage: db 'System Information:' ; String falls through to newline
+startmessage: db 13, 'System Information:' ; String falls through to newline
 newline: db 13, 0
 quote: db '"', 0
 cpustringmsg: db 'CPU String: ', 0
@@ -533,7 +533,7 @@ atamessage: db 13, 'ATA  - ', 0
 virtioblkmessage: db 13, 'Virt - ', 0
 dismessage: db 'Disabled', 0
 enmessage: db 'Enabled', 0
-busmessage: db 13, 'Bus:', 13, 'Seg  BS DF Vend Dvce CL SC Class Description              Subclass Description           EN', 13, 0
+busmessage: db 13, 'Bus:', 13, 'Seg  BS DF Vend Dvce CL SC Class Description              Subclass Description           EN', 0
 pci_classes:
 pci_00: db 'Unclassified device            ', 0
 pci_01: db 'Mass storage controller        ', 0

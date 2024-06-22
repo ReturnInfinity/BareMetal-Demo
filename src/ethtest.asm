@@ -11,7 +11,7 @@
 
 start:
 	mov rsi, startstring
-	mov rcx, 89
+	mov rcx, 90
 	call [b_output]
 
 	; Get the host MAC
@@ -41,9 +41,6 @@ ethtest:
 	jmp ethtest
 
 ethtest_finish:
-	mov rsi, newline
-	mov rcx, 1
-	call [b_output]
 	ret				; Return CPU control to the kernel
 
 ethtest_send:
@@ -167,7 +164,7 @@ dump_al_not_AF:
 ; -----------------------------------------------------------------------------
 
 
-startstring: db 'EthTest: Press S to send a packet, Q to quit.', 10, 'Received packets will display automatically'
+startstring: db 10, 'EthTest: Press S to send a packet, Q to quit.', 10, 'Received packets will display automatically'
 space: db ' '
 newline: db 10
 sendstring: db 10, 'Sending packet.'
