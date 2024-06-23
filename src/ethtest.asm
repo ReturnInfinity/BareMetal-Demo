@@ -48,7 +48,7 @@ ethtest_send:
 	mov rcx, 16
 	call [b_output]
 	mov rsi, packet
-	mov rcx, 50
+	mov rcx, 64
 	call [b_net_tx]
 	jmp ethtest
 
