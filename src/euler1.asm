@@ -47,12 +47,10 @@ add_counter:
 	mov rax, qword [rel sum]	; Copy sum to RAX
 	call int_to_string		; Convert value to RAX to string in [RDI]
 	call output
-	mov rsi, newline
-	call output
 
 	ret				; Return to OS
 
-message: db 'Sum of multiples of 3 or 5 below 1000: ', 0
+message: db 13, 'Sum of multiples of 3 or 5 below 1000: ', 0
 sum: dq 0
 counter: dq 1
 
@@ -136,5 +134,4 @@ int_to_string_next_digit:
 ; -----------------------------------------------------------------------------
 
 
-newline: db 13, 0
 tstring: times 50 db 0

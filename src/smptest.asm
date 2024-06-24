@@ -38,19 +38,15 @@ smp_task:
 	mov rcx, smp_lock		; Aquire the lock
 	call [b_system]
 	mov rsi, message		; Output the "Hello..." message
-	mov rcx, 18
+	mov rcx, 19
 	call [b_output]
 	mov rcx, smp_get_id		; Get the APIC ID of the CPU
 	call [b_config]
 	call dump_al
-	mov rsi, endmessage		; Output a newline
-	mov rcx, 1
-	call [b_output]
 	mov rax, outputlock
 	mov rcx, smp_unlock		; Release the mutex
 	call [b_system]
 	ret
-
 
 
 
@@ -92,8 +88,7 @@ dump_al_not_AF:
 	ret
 ; -----------------------------------------------------------------------------
 
-startstring: db 'SMPTest', 10
-message: db 'Hello from core 0x'
-endmessage: db 10
+startstring: db 13, 'SMPTest'
+message: db 13, 'Hello from core 0x'
 outputlock: dq 0
 tchar:
