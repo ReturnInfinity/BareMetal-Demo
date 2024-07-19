@@ -14,11 +14,11 @@ uint8_t depth;
 
 int main(void)
 {
-	// Gather video memory address, x & y resoultion, and BPP
-	frame_buffer = (unsigned char *)((uint64_t)(*(uint32_t *)(0x5080)));
+	// Gather video memory address, x & y resolution, and BPP
+	frame_buffer = (unsigned char *)(*(uint64_t *)(0x5080));
 	x_res = *(uint16_t *)(0x5084);
-	y_res = *(uint16_t *)(0x5086);
-	depth = *(uint8_t *)(0x5088);
+	y_res = *(uint16_t *)(0x508A);
+	depth = 32;
 
 	//draw a line
 	drawline(0, 0, x_res - 1, y_res - 1, 0xFF, 0xFF, 0xFF);
@@ -44,18 +44,18 @@ void drawline(int x0, int y0, int x1, int y1, char red, char green, char blue)
 {
 	// Shamelessly adapted from https://stackoverflow.com/questions/10060046/drawing-lines-with-bresenhams-line-algorithm
 	int x,y,dx,dy,dx1,dy1,px,py,xe,ye,i;
-        dx = x1 - x0;
-        dy = y1 - y0;
-        dx1 = dx;
-        dy1 = dy;
+	dx = x1 - x0;
+	dy = y1 - y0;
+	dx1 = dx;
+	dy1 = dy;
 	if (dx1 < 0) // Poor mans abs()
 		dx1 = dx1 - dx1 - dx1;
 	if (dy1 < 0) // Poor mans abs()
 		dy1 = dy1 - dy1 - dy1;
-        px = 2 * dy1 - dx1;
-        py = 2 * dx1 - dy1;
-        if(dy1 <= dx1)
-        {
+	px = 2 * dy1 - dx1;
+	py = 2 * dx1 - dy1;
+	if (dy1 <= dx1)
+	{
 		if(dx >= 0)
 		{
 			x = x0;

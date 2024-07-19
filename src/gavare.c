@@ -34,10 +34,9 @@ int r(int x, int y);
 
 int main() {
 	int x, y;
-	frame_buffer = (unsigned char *)((uint64_t)(*(uint32_t *)(0x5080)));
+	frame_buffer = (unsigned char *)(*(uint64_t *)(0x5080));
 	X = *(uint16_t *)(0x5084);
-	Y = *(uint16_t *)(0x5086);
-	BPP = *(uint8_t *)(0x5088);
+	Y = *(uint16_t *)(0x508A);
 	for (y=0; y<Y; y++)
 		for (x=0; x<X; x++)
 			r(x, y); // render each pixel
