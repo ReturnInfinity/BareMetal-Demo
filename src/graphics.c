@@ -16,7 +16,7 @@ int main(void)
 {
 	// Gather video memory address, x & y resolution, and BPP
 	frame_buffer = (unsigned char *)(*(uint64_t *)(0x5080));
-	x_res = *(uint16_t *)(0x5084);
+	x_res = *(uint16_t *)(0x5088);
 	y_res = *(uint16_t *)(0x508A);
 	depth = 32;
 
