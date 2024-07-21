@@ -18,5 +18,6 @@ SECTIONS
 		bss = .; _bss = .; __bss = .;
 		*(.bss);
 	}
+	__bss_stop = .;
 	end = .; _end = .; __end = .;
 }
