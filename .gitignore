@@ -3,4 +3,4 @@ bin/*
 src/libBareMetal.asm
 src/libBareMetal.c
 src/libBareMetal.h
-src/*.o
+src/**/*.o
