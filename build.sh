@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CFLAGS="-c -m64 -nostdlib -nostartfiles -nodefaultlibs -ffreestanding"
+CFLAGS="-c -m64 -nostdlib -nostartfiles -nodefaultlibs -ffreestanding -falign-functions=16"
 
 cd src
 nasm hello.asm -o ../bin/hello.app -l ../bin/hello-debug.txt
