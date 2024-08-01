@@ -16,6 +16,6 @@ if [ "$(uname)" != "Darwin" ]; then
 	gcc $CFLAGS -o graphics.o graphics.c
 	ld -T c.ld -o ../bin/graphics.app crt0.o graphics.o
 	gcc $CFLAGS -o gavare.o gavare.c
-	ld -T c.ld -o ../bin/gavare.app crt0.o gavare.o
+	ld -T c.ld -o ../bin/gavare.app gavare.o
 fi
 cd ..
