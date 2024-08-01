@@ -1,23 +1,39 @@
-OUTPUT_FORMAT("binary")
-OUTPUT_ARCH("i386:x86-64")
-ENTRY(main)
+OUTPUT_FORMAT(binary)
+OUTPUT_ARCH(i386:x86-64)
+
+ENTRY(_start)
+
 SECTIONS
 {
 	. = 0xFFFF800000000000;
+
 	.text : {
-		*(.text)
-		. = ALIGN(16);
+		*(.text .text.*)
 	}
+
+	. = ALIGN(16);
+
+	.rodata : {
+		*(.rodata .rodata.*)
+	}
+
+	. = ALIGN(16);
+
 	.data : {
-		*(.data)
-		*(.rodata)
-		. = ALIGN(16);
+		*(.data .data.*)
 	}
+
+	. = ALIGN(16);
+
 	__bss_start = .;
 	.bss : {
-		bss = .; _bss = .; __bss = .;
-		*(.bss);
+		*(.bss .bss.*)
 	}
 	__bss_stop = .;
-	end = .; _end = .; __end = .;
+
+	/DISCARD/ : {
+		*(.eh_frame*)
+		*(.note .note.*)
+		*(.intrep)
+	}
 }
