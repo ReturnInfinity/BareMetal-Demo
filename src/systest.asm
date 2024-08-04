@@ -54,9 +54,8 @@ systest_mem:
 	call dump_rax
 	mov rsi, memteststring2
 	call output
-	mov rsi, 0x5020
-	lodsd
-	sub rax, 2			; TODO - Check on this
+	mov rcx, free_memory
+	call [b_config]
 	shl rax, 20			; Convert MiB to Bytes
 	dec rax				; Decrement by 1 Byte
 	add rax, rdi
