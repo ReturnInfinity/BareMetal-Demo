@@ -8,6 +8,7 @@ nasm sysinfo.asm -o ../bin/sysinfo.app -l ../bin/sysinfo-debug.txt
 nasm euler1.asm -o ../bin/euler1.app
 nasm ethtest.asm -o ../bin/ethtest.app
 nasm smptest.asm -o ../bin/smptest.app
+nasm systest.asm -o ../bin/systest.app
 if [ "$(uname)" != "Darwin" ]; then
 	gcc $CFLAGS -o crt0.o crt0.c
 	gcc $CFLAGS -o libBareMetal.o libBareMetal.c
