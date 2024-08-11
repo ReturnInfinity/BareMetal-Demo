@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CFLAGS="-c -m64 -nostdlib -nostartfiles -nodefaultlibs -ffreestanding -falign-functions=16"
+CFLAGS="-c -m64 -nostdlib -nostartfiles -nodefaultlibs -ffreestanding -falign-functions=16 -fomit-frame-pointer -mno-red-zone -fno-builtin"
 
 cd src
 nasm hello.asm -o ../bin/hello.app -l ../bin/hello-debug.txt
@@ -18,5 +18,7 @@ if [ "$(uname)" != "Darwin" ]; then
 	ld -T c.ld -o ../bin/graphics.app crt0.o graphics.o
 	gcc $CFLAGS -o gavare.o gavare.c
 	ld -T c.ld -o ../bin/gavare.app crt0.o gavare.o
+	gcc $CFLAGS -o minIP.o minIP.c
+	ld -T c.ld -o ../bin/minIP.app crt0.o minIP.o libBareMetal.o
 fi
 cd ..
