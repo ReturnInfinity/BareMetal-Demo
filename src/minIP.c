@@ -221,6 +221,7 @@ int main()
 				ipv4_packet* rx_ipv4 = (ipv4_packet*)buffer;
 				if(rx_ipv4->protocol == PROTOCOL_IP_ICMP)
 				{
+					b_output(ping, (unsigned long)strlen(ping));
 					icmp_packet* rx_icmp = (icmp_packet*)buffer;
 					if(rx_icmp->type == ICMP_ECHO_REQUEST)
 					{
@@ -269,6 +270,7 @@ int main()
 				else if(rx_ipv4->protocol == PROTOCOL_IP_TCP)
 				{
 //					printf("TCP");
+					b_output(ipv4, (unsigned long)strlen(ipv4));
 					tcp_packet* rx_tcp = (tcp_packet*)buffer;
 					if (rx_tcp->flags == TCP_SYN)
 					{
