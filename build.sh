@@ -14,6 +14,8 @@ if [ "$(uname)" != "Darwin" ]; then
 	gcc $CFLAGS -o libBareMetal.o libBareMetal.c
 	gcc $CFLAGS -o helloc.o helloc.c
 	ld -T c.ld -o ../bin/helloc.app crt0.o helloc.o libBareMetal.o
+	gcc $CFLAGS -o cube3d.o cube3d.c
+	ld -T c.ld -o ../bin/cube3d.app crt0.o cube3d.o libBareMetal.o
 	gcc $CFLAGS -o graphics.o graphics.c
 	ld -T c.ld -o ../bin/graphics.app crt0.o graphics.o
 	gcc $CFLAGS -o gavare.o gavare.c
