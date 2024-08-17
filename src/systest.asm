@@ -72,7 +72,7 @@ systest_mem_next:
 	je systest_mem_next
 	mov rsi, memtesterror
 	call output
-	mov rax, [rdi]
+	mov rax, rdi
 	call dump_rax
 	mov rsi, memtesterror2
 	call output
