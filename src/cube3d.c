@@ -34,7 +34,7 @@ void drawPixel(S3L_PixelInfo *p)
 	  {
 		r = 0; g = 255, b = 0;
 	  }
-    
+
   else if (p->triangleIndex == 2 || p->triangleIndex == 3 ||
       p->triangleIndex == 6 || p->triangleIndex == 7)
 	{
@@ -78,8 +78,9 @@ int main(void)
 	x_res = *(uint16_t *)(0x5088);
 	y_res = *(uint16_t *)(0x508A);
 	unsigned char key = 0;
-	printf("Resolution %d - %d \n", x_res, y_res);
-	printf("Commands:\n d/a/w/s to rotate the cube\nq to go back to shell\nPress SPACE to continue.\n");
+	printf("Resolution %d -", &x_res);
+	printf(" %d \n", &y_res);
+	printf("Commands:\n d/a/w/s to rotate the cube\nq to go back to shell\nPress SPACE to continue.\n", 0);
 
 	while(key != ASCII_SPACE)
 	{
@@ -98,7 +99,7 @@ int main(void)
 		S3L_CUBE_VERTEX_COUNT,
 		cubeTriangles,
 		S3L_CUBE_TRIANGLE_COUNT,
-		&cubeModel); 
+		&cubeModel);
 
 	S3L_sceneInit( // Initialize the scene we'll be rendering.
 		&cubeModel,  // This is like an array with only one model in it.
@@ -112,7 +113,7 @@ int main(void)
 	scene.models[0].transform.rotation.x += 45;
 
 	S3L_newFrame();        // has to be called before each frame
-	S3L_drawScene(scene); 
+	S3L_drawScene(scene);
 
 	int i = 0;
   	while(key != ASCII_q && key != ASCII_Q)
@@ -124,7 +125,7 @@ int main(void)
 		for (int j = 0; j < frameBufferSize; ++j)
 		frame_buffer[j] = 0;
 
-	
+
 		S3L_newFrame();        // has to be called before each frame
 		S3L_drawScene(scene);  /* This starts the scene rendering. The drawPixel
 								function will be called to draw it. */
@@ -135,7 +136,7 @@ int main(void)
 		// now move and rotate the cube a little to see some movement:
 		switch(key)
 		{
-			case ASCII_d: 
+			case ASCII_d:
 				scene.models[0].transform.rotation.y += 10;
 				break;
 			case ASCII_a:
@@ -160,4 +161,3 @@ void putpixel(int x, int y, char red, char green, char blue)
 	frame_buffer[offset+1] = green;
 	frame_buffer[offset+2] = red;
 }
-

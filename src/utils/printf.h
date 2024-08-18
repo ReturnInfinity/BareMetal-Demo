@@ -1,181 +1,185 @@
 #ifndef UEFI_PRINTF_H
 #define UEFI_PRINTF_H
-
 #include <stdint.h>
-#include <stdarg.h>
 #include <stdbool.h>
+#include <stddef.h>
 
-// Helper function to reverse a string
-static void reverse(char *str, int length) {
-    int start = 0;
-    int end = length - 1;
-    while (start < end) {
-        char temp = str[start];
-        str[start] = str[end];
-        str[end] = temp;
-        start++;
-        end--;
-    }
-}
+void long_to_str(int64_t num, char* str) {
+    int64_t i = 0;
+    int64_t is_negative = 0;
 
-// Helper function to convert integer to string
-static int intToStr(int num, char *str, int base, bool isUnsigned) {
-    int i = 0;
-    bool isNegative = false;
-
-    if (num == 0) {
-        str[i++] = '0';
-        str[i] = '\0';
-        return i;
-    }
-
-    if (base == 10 && !isUnsigned && num < 0) {
-        isNegative = true;
+    if (num < 0) {
+        is_negative = 1;
         num = -num;
     }
 
-    while (num != 0) {
-        int rem = num % base;
-        str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
-        num = num / base;
-    }
+    do {
+        str[i++] = (num % 10) + '0';
+        num /= 10;
+    } while (num > 0);
 
-    if (isNegative) {
+    if (is_negative) {
         str[i++] = '-';
     }
 
     str[i] = '\0';
-    reverse(str, i);
-    return i;
+
+    // Reverse the string
+    for (int j = 0; j < i / 2; j++) {
+        char temp = str[j];
+        str[j] = str[i - j - 1];
+        str[i - j - 1] = temp;
+    }
 }
 
-// Helper function to convert float to string
-static int floatToStr(double num, char *str, int precision) {
-    int i = 0;
+void int_to_str(int16_t num, char* str) {
+    long_to_str(num, str);  // Reuse long_to_str as int is a subset of long
+}
 
+void float_to_str(float num, char* str, int precision) {
+    // Handling negative numbers
+    int i = 0;
     if (num < 0) {
         str[i++] = '-';
         num = -num;
     }
 
-    int intPart = (int)num;
-    double fractionPart = num - (double)intPart;
+    // Extract the integer part
+    int int_part = (int)num;
+    float fraction = num - (float)int_part;
 
-    i += intToStr(intPart, str + i, 10, true);
+    // Convert integer part to string
+    int_to_str(int_part, str + i);
+    while (str[i] != '\0') i++;  // Move index to end of integer part
 
-    if (precision > 0) {
-        str[i++] = '.';
+    // Add decimal point
+    str[i++] = '.';
 
-        fractionPart *= 10 * precision;
-        i += intToStr((int)fractionPart, str + i, 10, true);
+    // Handle fractional part up to given precision
+    for (int j = 0; j < precision; j++) {
+        fraction *= 10;
+        int frac_digit = (int)fraction;
+        str[i++] = frac_digit + '0';
+        fraction -= frac_digit;
     }
 
     str[i] = '\0';
-    return i;
 }
 
-// snprintf function implementation
-static int snprintf(char *buffer, unsigned long n, const char *format, ...) {
-    va_list args;
-    va_start(args, format);
+void hex_to_str(unsigned long num, char* str) {
+    const char* hex_digits = "0123456789abcdef";
+    int i = 0;
 
-    unsigned long written = 0;
-    const char *ptr = format;
-    while (*ptr != '\0' && written < n) {
-        if (*ptr == '%') {
-            ptr++;
-            char numStr[32];
-            int len = 0;
+    do {
+        str[i++] = hex_digits[num % 16];
+        num /= 16;
+    } while (num > 0);
 
-            switch (*ptr) {
-                case 'd': {
-                    int num = va_arg(args, int);
-                    len = intToStr(num, numStr, 10, false);
-                    break;
+    str[i] = '\0';
+
+    // Reverse the string
+    for (int j = 0; j < i / 2; j++) {
+        char temp = str[j];
+        str[j] = str[i - j - 1];
+        str[i - j - 1] = temp;
+    }
+}
+
+int printf(const char* format, void* param) {
+    char buffer[1024];
+    char* str = buffer;
+    const char* p;
+
+    for (p = format; *p != '\0'; p++) {
+        if (*p == '%' && (*(p + 1) == 's' || *(p + 1) == 'd' || *(p + 1) == 'l' ||
+                          *(p + 1) == 'f' || *(p + 1) == 'x' || *(p + 1) == 'p' ||
+                          *(p + 1) == 'z')) {
+            p++;
+            if (*p == 's') {
+                const char* s = (const char*) param;
+                while (*s) {
+                    *str++ = *s++;
                 }
-                case 'x': {
-                    int num = va_arg(args, int);
-                    len = intToStr(num, numStr, 16, true);
-                    break;
+            } else if (*p == 'd') {
+                int16_t d = *((int16_t *)param);
+                char num_str[32];
+                int_to_str(d, num_str);
+                char* ns = num_str;
+                while (*ns) {
+                    *str++ = *ns++;
                 }
-                case 'p': {
-                    uintptr_t ptrVal = (uintptr_t)va_arg(args, void *);
-                    len = intToStr(ptrVal, numStr, 16, true);
-                    break;
+            } else if (*p == 'l' && *(p + 1) == 'd') {
+                p++;
+                long ld = *((long *)param);
+                char num_str[32];
+                long_to_str(ld, num_str);
+                char* ns = num_str;
+                while (*ns) {
+                    *str++ = *ns++;
                 }
-                case 's': {
-                    const char *str = va_arg(args, const char *);
-                    while (*str != '\0' && written < n) {
-                        buffer[written++] = *str++;
-                    }
-                    ptr++;
-                    continue;
+            } else if (*p == 'f') {
+                float f = *((float *)param);
+                char num_str[64];
+                float_to_str((float)f, num_str, 6);  // Default to 6 decimal places
+                char* ns = num_str;
+                while (*ns) {
+                    *str++ = *ns++;
                 }
-                case 'f': {
-                    double num = va_arg(args, double);
-                    len = floatToStr(num, numStr, 6); // Default precision of 6
-                    break;
+            } else if (*p == 'x') {
+                unsigned int x = *((unsigned int *)param);
+                char num_str[32];
+                hex_to_str(x, num_str);
+                char* ns = num_str;
+                while (*ns) {
+                    *str++ = *ns++;
                 }
-                case 'z': { // size_t
-                    if (*(ptr + 1) == 'u') {
-                        ptr++;
-                        unsigned long num = va_arg(args, unsigned long);
-                        len = intToStr(num, numStr, 10, true);
-                    }
-                    break;
+            } else if (*p == 'p') {
+                void* ptr = param;
+                char num_str[32];
+                hex_to_str((unsigned long)ptr, num_str);
+                *str++ = '0';
+                *str++ = 'x';
+                char* ns = num_str;
+                while (*ns) {
+                    *str++ = *ns++;
                 }
-                case 'l': {
-                    if (*(ptr + 1) == 'd') {
-                        ptr++;
-                        long num = va_arg(args, long);
-                        len = intToStr(num, numStr, 10, false);
-                    }
-                    break;
+            } else if (*p == 'z') {
+                size_t z = *((size_t *)param);
+                char num_str[32];
+                long_to_str((long)z, num_str);
+                char* ns = num_str;
+                while (*ns) {
+                    *str++ = *ns++;
                 }
-                default:
-                    buffer[written++] = '%';
-                    buffer[written++] = *ptr;
-                    ptr++;
-                    continue;
             }
-
-            if (len + written < n) {
-                for (int i = 0; i < len; i++) {
-                    buffer[written++] = numStr[i];
-                }
-            }
-
-            ptr++;
         } else {
-            buffer[written++] = *ptr++;
+            *str++ = *p;
         }
     }
 
-    va_end(args);
+    *str = '\0';
 
-    if (written < n) {
-        buffer[written] = '\0';
-    } else if (n > 0) {
-        buffer[n - 1] = '\0';
-    }
-
-    return (int)written;
+    b_output(buffer, str - buffer);
+    return str - buffer;
 }
 
-// printf function implementation using snprintf
-static int printf(const char *format, ...) {
-    char buffer[1024]; // Buffer to store the formatted string
-    va_list args;
-    va_start(args, format);
+void testPrintf(void)
+{
+    int integer = -12345;
+    long long_integer = 1234567890L;
+    float floating = 3.141592;
+    unsigned int hex_num = 0xABCD1234;
+    const char* string = "Hello, world!";
+    void* pointer = (void*)string;
+    size_t size = sizeof(pointer);
 
-    int ret = snprintf(buffer, sizeof(buffer), format, args);
-
-    va_end(args);
-
-    // Output the string using the b_output function
-    b_output(buffer, (unsigned long)ret);
-
-    return ret;
+    printf("Integer: %d\n", &integer);
+    printf("Long integer: %ld\n", &long_integer);
+    printf("Float: %f\n", &floating);
+    printf("Hexadecimal: %x\n", &hex_num);
+    printf("Pointer: %p\n", &pointer);
+    printf("String: %s\n", &string);
+    printf("Size_t: %z\n", &size);
 }
 
 #endif // UEFI_PRINTF_H
