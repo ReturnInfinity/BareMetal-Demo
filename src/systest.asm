@@ -202,8 +202,7 @@ smp_task:
 	mov rcx, smp_lock		; Aquire the lock
 	call [b_system]
 	mov rsi, smptestmessage		; Output the "Hello..." message
-	mov rcx, 19
-	call [b_output]
+	call output
 	mov rcx, smp_get_id		; Get the APIC ID of the CPU
 	call [b_config]
 	call dump_al
@@ -305,7 +304,7 @@ dump_al:
 ; Strings
 startstring: db 13, 'SysTest', 13, '========', 13, '1 - SMP Test', 13, '2 - Memory Test', 13, '3 - Network Test', 13, 'q - Quit', 13, 'Enter selection: ', 0
 smpteststring: db 13, 'SMP Test', 13, 'A message from each core should be displayed', 0
-smptestmessage: db 13, 'Hello from core 0x'
+smptestmessage: db 13, 'Hello from core 0x', 0
 memteststring: db 13, 'Memory Test', 13, 'Starting at 0x', 0
 memteststring2: db ', testing up to ', 0
 memtesterror: db 13, 'Error at ', 0
