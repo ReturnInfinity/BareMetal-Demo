@@ -166,27 +166,6 @@ systest_net_receive_type:
 	mov rsi, space
 	call output
 	pop rsi
-	cmp bx, 0x0806
-	je systest_net_receive_type_arp
-	cmp bx, 0x0800
-	je systest_net_receive_type_ipv4
-	cmp bx, 0x86DD
-	je systest_net_receive_type_ipv6
-	jmp systest_net_main
-
-systest_net_receive_type_arp:
-	mov rsi, nettestARP
-	call output
-	jmp systest_net_main
-
-systest_net_receive_type_ipv4:
-	mov rsi, nettestIPv4
-	call output
-	jmp systest_net_main
-
-systest_net_receive_type_ipv6:
-	mov rsi, nettestIPv6
-	call output
 	jmp systest_net_main
 
 systest_end:
@@ -312,9 +291,6 @@ memtesterror2: db 13, 'Ending test early', 0
 netteststring: db 13, 'Network Test', 13, 'Press S to send a packet, Q to quit.', 13, 'Received packets will display automatically', 0
 nettestsendstring: db 13, 'Sending packet.', 0
 nettestreceivestring: db 13, 'Received packet: ', 0
-nettestIPv4: db 'IPv4', 0
-nettestARP: db 'ARP ', 0
-nettestIPv6: db 'IPv6', 0
 donestring: db 13, 'Done!', 13, 0
 hextable: db '0123456789ABCDEF'
 space: db ' ', 0
