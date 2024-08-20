@@ -3,18 +3,21 @@
 ;
 ; BareMetal compile:
 ; nasm hello.asm -o hello.app
+;
+; This simple test program outputs the string in hello_message
+; 1) Load the string address into the `RSI` register. The `LEA` instruction is used here. `MOV` could also be used via `mov rsi, hello_message`
+; 2) Load the number of characters to output into the `RCX` register. `ECX` is used since a `MOV` to it will clear the high 32-bits
+; 3) Call the kernel function to output characters. It depends on the string address in `RSI` and the number of characters to output in `RCX`
+; 4) Return to the OS/CLI
 
 [BITS 64]
-[ORG 0xFFFF800000000000]
 
 %INCLUDE "libBareMetal.asm"
 
 start:					; Start of program label
-
-	mov rsi, hello_message		; Load RSI with memory address of string
-	mov rcx, 14			; Output 14 characters
+	lea rsi, [rel hello_message]	; Load RSI with the relative memory address of string
+	mov ecx, 14			; Output 14 characters
 	call [b_output]			; Print the string that RSI points to
-
-ret					; Return to OS
+	ret				; Return to OS
 
 hello_message: db 13, 'Hello, world!', 0
