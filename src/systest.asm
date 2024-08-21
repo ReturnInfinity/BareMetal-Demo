@@ -1,16 +1,15 @@
-; System Test Program (v0.1, August 4 2024)
+; System Test Program (v1.0, August 21 2024)
 ; Written by Ian Seyler
 ;
 ; BareMetal compile:
 ; nasm systest.asm -o systest.app
 
 [BITS 64]
-[ORG 0xFFFF800000000000]
 
 %include 'libBareMetal.asm'
 
 start:
-	mov rsi, startstring
+	lea rsi, [rel startstring]
 	call output
 
 systest_wait_for_input:
@@ -28,10 +27,10 @@ systest_wait_for_input:
 	jmp systest_wait_for_input
 
 systest_smp:
-	mov rsi, smpteststring
+	lea rsi, [rel smpteststring]
 	call output
 	mov rcx, smp_set		; API Code
-	mov rax, smp_task		; Code for CPU to run
+	lea rax, [rel smp_task]		; Code for CPU to run
 	xor edx, edx			; Start at ID 0
 systest_smp_startloop:
 	call [b_system]			; Give the CPU a code address
@@ -44,17 +43,17 @@ systest_smp_startwait:
 	call [b_system]
 	cmp al, 0
 	jne systest_smp_startwait
-	mov rsi, donestring
+	lea rsi, [rel donestring]
 	call output
 	jmp start
 
 systest_mem:
-	mov rsi, memteststring
+	lea rsi, [rel memteststring]
 	call output
 	mov rdi, 0xFFFF800000000000
 	mov rax, rdi
 	call dump_rax
-	mov rsi, memteststring2
+	lea rsi, [rel memteststring2]
 	call output
 	mov eax, [0x00110104]
 	shl rax, 20			; Convert MiB to Bytes
@@ -72,24 +71,24 @@ systest_mem_next:
 	mov rbx, [rdi]
 	cmp rax, rbx
 	je systest_mem_next
-	mov rsi, memtesterror
+	lea rsi, [rel memtesterror]
 	call output
 	mov rax, rdi
 	call dump_rax
 	mov rsi, memtesterror2
 	call output
 systest_mem_done:
-	mov rsi, donestring
+	lea rsi, [rel donestring]
 	call output
 	jmp start
 
 systest_net:
-	mov rsi, netteststring
+	lea rsi, [rel netteststring]
 	call output
 
 	; Get the host MAC
 	mov rax, [0x110048]		; TODO Get from kernel via API
-	mov rdi, source
+	lea rdi, [rel source]
 	mov rcx, 6
 systest_net_srcmacnext:
 	stosb
@@ -99,7 +98,7 @@ systest_net_srcmacnext:
 	jne systest_net_srcmacnext
 
 systest_net_main:
-	mov rdi, buffer
+	lea rdi, [rel buffer]
 	call [b_net_rx]
 	cmp cx, 0
 	jne systest_net_receive
@@ -115,17 +114,17 @@ systest_net_finish:
 	jmp start
 
 systest_net_send:
-	mov rsi, nettestsendstring
+	lea rsi, [rel nettestsendstring]
 	call output
-	mov rsi, packet
+	lea rsi, [rel packet]
 	mov rcx, 64
 	call [b_net_tx]
 	jmp systest_net_main
 
 systest_net_receive:
-	mov rsi, nettestreceivestring
+	lea rsi, [rel nettestreceivestring]
 	call output
-	mov rsi, buffer
+	lea rsi, [rel buffer]
 
 	; Output the destination MAC
 	mov rcx, 6
@@ -136,7 +135,7 @@ systest_net_receive_dest:
 	cmp rcx, 0
 	jne systest_net_receive_dest
 	push rsi
-	mov rsi, space
+	lea rsi, [rel space]
 	call output
 	pop rsi
 
@@ -149,7 +148,7 @@ systest_net_receive_src:
 	cmp rcx, 0
 	jne systest_net_receive_src
 	push rsi
-	mov rsi, space
+	lea rsi, [rel space]
 	call output
 	pop rsi
 
@@ -163,7 +162,7 @@ systest_net_receive_type:
 	mov bl, al
 	call dump_al
 	push rsi
-	mov rsi, space
+	lea rsi, [rel space]
 	call output
 	pop rsi
 	jmp systest_net_main
@@ -177,15 +176,15 @@ systest_end:
 ; The mutex is used so only one CPU can output its message at a time
 align 16
 smp_task:
-	mov rax, outputlock		; Location of the mutex
+	lea rax, [rel outputlock]	; Location of the mutex
 	mov rcx, smp_lock		; Aquire the lock
 	call [b_system]
-	mov rsi, smptestmessage		; Output the "Hello..." message
+	lea rsi, [rel smptestmessage]	; Output the "Hello..." message
 	call output
 	mov rcx, smp_get_id		; Get the APIC ID of the CPU
 	call [b_config]
 	call dump_al
-	mov rax, outputlock
+	lea rax, [rel outputlock]
 	mov rcx, smp_unlock		; Release the mutex
 	call [b_system]
 	ret
@@ -259,8 +258,8 @@ dump_al:
 	push rdi
 	push rbx
 	push rax
-	mov rbx, hextable
-	mov rdi, tchar
+	lea rbx, [rel hextable]
+	lea rdi, [rel tchar]
 	push rax			; Save RAX since we work in 2 parts
 	shr al, 4			; Shift high 4 bits into low 4 bits
 	xlatb
@@ -270,7 +269,7 @@ dump_al:
 	xlatb
 	stosb
 	push rsi
-	mov rsi, tchar
+	lea rsi, [rel tchar]
 	call output
 	pop rsi
 	pop rax
