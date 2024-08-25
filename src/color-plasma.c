@@ -5,6 +5,7 @@
 #define size_t uint64_t
 #include "utils/math/math.h"
 #include "utils/math/vector.h"
+#include "utils/memory.h"
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
@@ -18,8 +19,6 @@ uint8_t depth;
 
 void putpixel(int x, int y, char red, char green, char blue);
 void b_system_delay(unsigned long long delay);
-void *memcpy(void *dest, const void *src, size_t n);
-void *memset(void *dest, int c, size_t n);
 void switchBuffers();
 void buildColorPalette();
 void plasmaStep(float xShift, float yShift, float radialShift);
@@ -140,25 +139,4 @@ void putpixel(int x, int y, char red, char green, char blue)
 	frame_buffer[offset+0] = blue;
 	frame_buffer[offset+1] = green;
 	frame_buffer[offset+2] = red;
-}
-
-void *memcpy(void *dest, const void *src, size_t n)
-{
-	unsigned char *d = (unsigned char *)dest;
-	const unsigned char *s = (const unsigned char *)src;
-
-	while (n--) {
-		*d++ = *s++;
-	}
-
-	return dest;
-}
-
-void *memset(void *dest, int c, size_t n)
-{
-	unsigned char *d = (unsigned char *)dest;
-
-	while (n--) {
-		*d++ = c;
-	}
 }
