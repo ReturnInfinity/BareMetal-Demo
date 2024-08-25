@@ -24,5 +24,7 @@ if [ "$(uname)" != "Darwin" ]; then
 	ld -T c.ld -o ../bin/gavare.app crt0.o gavare.o
 	gcc $CFLAGS -o minIP.o minIP.c
 	ld -T c.ld -o ../bin/minIP.app crt0.o minIP.o libBareMetal.o
+	gcc $CFLAGS -o ./3d-model-loader/3d-model-loader.o ./3d-model-loader/3d-model-loader.c
+	ld -T c.ld -o ../bin/3d-model-loader.app crt0.o ./3d-model-loader/3d-model-loader.o libBareMetal.o
 fi
 cd ..

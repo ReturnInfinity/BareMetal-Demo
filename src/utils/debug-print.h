@@ -1,5 +1,5 @@
-#ifndef UEFI_PRINTF_H
-#define UEFI_PRINTF_H
+#ifndef DEBUG_PRINT_H
+#define DEBUG_PRINT_H
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -85,7 +85,7 @@ void hex_to_str(unsigned long num, char* str) {
     }
 }
 
-int printf(const char* format, void* param) {
+int debug_print(const char* format, void* param) {
     char buffer[1024];
     char* str = buffer;
     const char* p;
@@ -163,7 +163,7 @@ int printf(const char* format, void* param) {
     return str - buffer;
 }
 
-void testPrintf(void)
+void testdebug_print(void)
 {
     int integer = -12345;
     long long_integer = 1234567890L;
@@ -173,13 +173,13 @@ void testPrintf(void)
     void* pointer = (void*)string;
     size_t size = sizeof(pointer);
 
-    printf("Integer: %d\n", &integer);
-    printf("Long integer: %ld\n", &long_integer);
-    printf("Float: %f\n", &floating);
-    printf("Hexadecimal: %x\n", &hex_num);
-    printf("Pointer: %p\n", &pointer);
-    printf("String: %s\n", &string);
-    printf("Size_t: %z\n", &size);
+    debug_print("Integer: %d\n", &integer);
+    debug_print("Long integer: %ld\n", &long_integer);
+    debug_print("Float: %f\n", &floating);
+    debug_print("Hexadecimal: %x\n", &hex_num);
+    debug_print("Pointer: %p\n", &pointer);
+    debug_print("String: %s\n", &string);
+    debug_print("Size_t: %z\n", &size);
 }
 
 #endif // UEFI_PRINTF_H

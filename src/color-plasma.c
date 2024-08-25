@@ -1,10 +1,12 @@
 #include <stdint.h>
 #include "utils/keys.h"
 #include "libBareMetal.h"
-#include "utils/printf.h"
+#include "utils/debug-print.h"
 #define size_t uint64_t
 #include "utils/math/math.h"
 #include "utils/math/vector.h"
+#include "utils/memory.h"
+
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
@@ -18,8 +20,6 @@ uint8_t depth;
 
 void putpixel(int x, int y, char red, char green, char blue);
 void b_system_delay(unsigned long long delay);
-void *memcpy(void *dest, const void *src, size_t n);
-void *memset(void *dest, int c, size_t n);
 void switchBuffers();
 void buildColorPalette();
 void plasmaStep(float xShift, float yShift, float radialShift);
@@ -48,11 +48,9 @@ int main()
 	cli_save = (unsigned char *)(0xFFFF800001F00000);
 
 	unsigned char key = 0;
-	printf("\nResolution %d x", &x_res);
-	printf(" %d \n", &y_res);
-	printf("Commands:\nq to go back to shell\nPress SPACE to continue.", 0);
-
-	memcpy(cli_save, video_memory, frameBufferSize); // Save the starting screen state
+	debug_print("\nResolution X - %d \n", &x_res);
+	debug_print("Resolution Y - %d \n", &y_res);
+	debug_print("Commands:\nq to go back to shell\nPress SPACE to continue.\n", NULL);
 
 	while(key != ASCII_SPACE)
 	{
@@ -140,25 +138,4 @@ void putpixel(int x, int y, char red, char green, char blue)
 	frame_buffer[offset+0] = blue;
 	frame_buffer[offset+1] = green;
 	frame_buffer[offset+2] = red;
-}
-
-void *memcpy(void *dest, const void *src, size_t n)
-{
-	unsigned char *d = (unsigned char *)dest;
-	const unsigned char *s = (const unsigned char *)src;
-
-	while (n--) {
-		*d++ = *s++;
-	}
-
-	return dest;
-}
-
-void *memset(void *dest, int c, size_t n)
-{
-	unsigned char *d = (unsigned char *)dest;
-
-	while (n--) {
-		*d++ = c;
-	}
 }
