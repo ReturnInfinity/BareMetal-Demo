@@ -14,8 +14,7 @@
 
 void putpixel(int x, int y, char red, char green, char blue);
 void clearScreen();
-void sampleTexture(const uint8_t *tex, int32_t u, int32_t v, uint8_t *r,
-                   uint8_t *g, uint8_t *b);
+void sampleTexture(const uint8_t *tex, int32_t u, int32_t v, uint8_t *r, uint8_t *g, uint8_t *b);
 
 unsigned char *frame_buffer;
 unsigned char *video_memory;
@@ -37,11 +36,10 @@ uint64_t frameBufferSize;
 void printHelp(void);
 
 void printHelp(void) {
-	debug_print("\nModelviewer: example program for small3dlib.\n\n", 0);
-
-	debug_print("contols:\n", 0);
+	debug_print("\nModelviewer: example program for small3dlib.", 0);
+	debug_print("\n\ncontrols:\n", 0);
 	debug_print("  space            next model\n", 0);
-	debug_print("  0 - 5            set display mode\n", 0);
+	debug_print("  1 - 6            set display mode\n", 0);
 	debug_print("  w                toggle wireframe\n", 0);
 	debug_print("  l                toggle light\n", 0);
 	debug_print("  f                toggle fog\n", 0);
@@ -312,114 +310,111 @@ void setModel(uint32_t index) {
 int16_t fps = 0;
 
 int main(void) {
-  // Gather video memory address, x & y resolution, and BPP
-  video_memory = (unsigned char *)(*(uint64_t *)(0x5080));
-  x_res = *(uint16_t *)(0x5088);
-  y_res = *(uint16_t *)(0x508A);
-  offset_x = (x_res - S3L_RESOLUTION_X) / 2;
-  offset_y = (y_res - S3L_RESOLUTION_Y) / 2;
+	// Gather video memory address, x & y resolution, and BPP
+	video_memory = (unsigned char *)(*(uint64_t *)(0x5080));
+	x_res = *(uint16_t *)(0x5088);
+	y_res = *(uint16_t *)(0x508A);
+	offset_x = (x_res - S3L_RESOLUTION_X) / 2;
+	offset_y = (y_res - S3L_RESOLUTION_Y) / 2;
+	depth = 32;
+	frameBufferSize = x_res * y_res * 4;
+	frame_buffer = (unsigned char *)(0xFFFF80000F000000);
+	cli_save = (unsigned char *)(0xFFFF80000C000000);
 
-  depth = 32;
-  frameBufferSize = x_res * y_res * 4;
-  frame_buffer = (unsigned char *)(0xFFFF80000F000000);
-  //cli_save = (unsigned char *)(0xFFFF80000C000000);
+	int key = 0;
+	printHelp();
+	debug_print("\nPress SPACE to continue.\n", 0);
+	memcpy(cli_save, video_memory, frameBufferSize); // Save the starting screen state
+	int position = 0;
 
+	while (key != ASCII_SPACE) {
+		key = b_input();
+	}
 
-  int key = 0;
-  printHelp();
-  debug_print("\nPress SPACE to continue.\n", 0);
-  //memcpy(cli_save, video_memory, frameBufferSize); // Save the starting screen state
-  int position = 0;
+	frame_buffer = (unsigned char *)(0xFFFF80000F000000);
 
-  while (key != ASCII_SPACE) {
-    key = b_input();
-  }
+	toLight.x = 10;
+	toLight.y = 10;
+	toLight.z = 10;
 
-  frame_buffer = (unsigned char *)(0xFFFF80000F000000);
+	S3L_vec3Normalize(&toLight);
 
-  toLight.x = 10;
-  toLight.y = 10;
-  toLight.z = 10;
+	S3L_sceneInit(&model, 1, &scene);
 
-  S3L_vec3Normalize(&toLight);
+	houseModelInit();
+	chestModelInit();
+	plantModelInit();
+	cat1ModelInit();
+	cat2ModelInit();
 
-  S3L_sceneInit(&model, 1, &scene);
+	scene.camera.transform.translation.z = -S3L_F * 8;
 
-  houseModelInit();
-  chestModelInit();
-  plantModelInit();
-  cat1ModelInit();
-  cat2ModelInit();
+	catModel = cat1Model;
+	catModel.vertices = catVertices;
+	animate(0);
 
-  scene.camera.transform.translation.z = -S3L_F * 8;
+	int8_t modelIndex = 0;
+	int8_t modelsTotal = 4;
+	setModel(0);
 
-  catModel = cat1Model;
-  catModel.vertices = catVertices;
-  animate(0);
+	key = 0;
+	int running = 1;
 
-  int8_t modelIndex = 0;
-  int8_t modelsTotal = 4;
-  setModel(0);
-
-  key = 0;
-  int running = 1;
-
-  while (running) {
-    key = b_input();
-    draw();
-    switchBuffers();
+	while (running) {
+		key = b_input();
+		draw();
+		switchBuffers();
 
 
-    int16_t rotationStep = 1;
-    int16_t moveStep = 3000;
-    int16_t fovStep = 3000;
-    model.transform.rotation.y -= rotationStep;
+		int16_t rotationStep = 1;
+		int16_t moveStep = 3000;
+		int16_t fovStep = 3000;
+		model.transform.rotation.y -= rotationStep;
 
-    switch (key) {
-    case ASCII_q:
-      running = 0;
-      break;
-    case ASCII_l:
-      light = !light;
-      break;
-    case ASCII_f:
-      fog = !fog;
-      break;
-    case ASCII_n:
-      noise = !noise;
-      break;
-    case ASCII_w:
-      wire = !wire;
-      break;
+		switch (key) {
+			case ASCII_q:
+				running = 0;
+				break;
+			case ASCII_l:
+				light = !light;
+				break;
+			case ASCII_f:
+				fog = !fog;
+				break;
+			case ASCII_n:
+				noise = !noise;
+				break;
+			case ASCII_w:
+				wire = !wire;
+				break;
+			case ASCII_SPACE:
+				modelIndex = (modelIndex + 1) % modelsTotal;
+				setModel(modelIndex);
+				break;
+			case ASCII_1:
+				mode = MODE_TEXTUERED;
+				break;
+			case ASCII_2:
+				mode = MODE_SINGLE_COLOR;
+				break;
+			case ASCII_3:
+				mode = MODE_NORMAL_SMOOTH;
+				break;
+			case ASCII_4:
+				mode = MODE_NORMAL_SHARP;
+				break;
+			case ASCII_5:
+				mode = MODE_BARYCENTRIC;
+				break;
+			case ASCII_6:
+				mode = MODE_TRIANGLE_INDEX;
+				break;
+		}
+		frame++;
+	}
 
-    case ASCII_SPACE:
-      modelIndex = (modelIndex + 1) % modelsTotal;
-      setModel(modelIndex);
-      break;
-
-    case ASCII_1:
-      mode = MODE_TEXTUERED;
-      break;
-    case ASCII_2:
-      mode = MODE_SINGLE_COLOR;
-      break;
-    case ASCII_3:
-      mode = MODE_NORMAL_SMOOTH;
-      break;
-    case ASCII_4:
-      mode = MODE_NORMAL_SHARP;
-      break;
-    case ASCII_5:
-      mode = MODE_BARYCENTRIC;
-      break;
-    case ASCII_6:
-      mode = MODE_TRIANGLE_INDEX;
-      break;
-    }
-    frame++;
-  }
-  //memcpy(video_memory, cli_save, frameBufferSize); // Restore the original screen
-  return 0;
+	memcpy(video_memory, cli_save, frameBufferSize); // Restore the original screen
+	return 0;
 }
 
 void putpixel(int x, int y, char red, char green, char blue) {
@@ -431,16 +426,15 @@ void putpixel(int x, int y, char red, char green, char blue) {
 
 void clearScreen() { memset(frame_buffer, 0, frameBufferSize); }
 
-void sampleTexture(const uint8_t *tex, int32_t u, int32_t v, uint8_t *r,
-                   uint8_t *g, uint8_t *b) {
-  u = S3L_wrap(u, TEXTURE_W);
-  v = S3L_wrap(v, TEXTURE_H);
+void sampleTexture(const uint8_t *tex, int32_t u, int32_t v, uint8_t *r, uint8_t *g, uint8_t *b) {
+	u = S3L_wrap(u, TEXTURE_W);
+	v = S3L_wrap(v, TEXTURE_H);
 
-  const uint8_t *t = tex + (v * TEXTURE_W + u) * 4;
+	const uint8_t *t = tex + (v * TEXTURE_W + u) * 4;
 
-  *r = *t;
-  t++;
-  *g = *t;
-  t++;
-  *b = *t;
+	*r = *t;
+	t++;
+	*g = *t;
+	t++;
+	*b = *t;
 }
