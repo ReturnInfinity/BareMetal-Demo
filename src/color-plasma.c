@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "utils/keys.h"
 #include "libBareMetal.h"
-#include "utils/printf.h"
+#include "utils/debug-print.h"
 #define size_t uint64_t
 #include "utils/math/math.h"
 #include "utils/math/vector.h"
@@ -48,9 +48,9 @@ int main()
 	cli_save = (unsigned char *)(0xFFFF800001F00000);
 
 	unsigned char key = 0;
-	printf("\nResolution %d x", &x_res);
-	printf(" %d \n", &y_res);
-	printf("Commands:\nq to go back to shell\nPress SPACE to continue.", 0);
+	debug_print("\nResolution %d x", &x_res);
+	debug_print(" %d \n", &y_res);
+	debug_print("Commands:\nq to go back to shell\nPress SPACE to continue.", 0);
 
 	memcpy(cli_save, video_memory, frameBufferSize); // Save the starting screen state
 

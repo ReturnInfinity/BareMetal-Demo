@@ -14,15 +14,15 @@ if [ "$(uname)" != "Darwin" ]; then
 	gcc $CFLAGS -o libBareMetal.o libBareMetal.c
 	gcc $CFLAGS -o helloc.o helloc.c
 	ld -T c.ld -o ../bin/helloc.app crt0.o helloc.o libBareMetal.o
-	gcc $CFLAGS -o cube3d.o cube3d.c
-	ld -T c.ld -o ../bin/cube3d.app crt0.o cube3d.o libBareMetal.o
-	gcc $CFLAGS -o color-plasma.o color-plasma.c
-	ld -T c.ld -o ../bin/color-plasma.app crt0.o color-plasma.o libBareMetal.o
-	gcc $CFLAGS -o graphics.o graphics.c
-	ld -T c.ld -o ../bin/graphics.app crt0.o graphics.o
 	gcc $CFLAGS -o gavare.o gavare.c
 	ld -T c.ld -o ../bin/gavare.app crt0.o gavare.o
 	gcc $CFLAGS -o minIP.o minIP.c
 	ld -T c.ld -o ../bin/minIP.app crt0.o minIP.o libBareMetal.o
+	gcc $CFLAGS -o cube3d.o cube3d.c
+	ld -T c.ld -o ../bin/cube3d.app crt0.o cube3d.o libBareMetal.o
+	gcc $CFLAGS -o color-plasma.o color-plasma.c
+	ld -T c.ld -o ../bin/color-plasma.app crt0.o color-plasma.o libBareMetal.o
+	gcc $CFLAGS -o ./3d-model-loader/3d-model-loader.o ./3d-model-loader/3d-model-loader.c
+	ld -T c.ld -o ../bin/3d-model-loader.app crt0.o ./3d-model-loader/3d-model-loader.o libBareMetal.o
 fi
 cd ..

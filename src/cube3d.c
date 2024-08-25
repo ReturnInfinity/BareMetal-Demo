@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "libBareMetal.h"
 #include "utils/keys.h"
-#include "utils/printf.h"
+#include "utils/debug-print.h"
 #define size_t uint64_t
 
 void putpixel(int x, int y, char red, char green, char blue);
@@ -77,9 +77,9 @@ int main(void)
 	x_res = *(uint16_t *)(0x5088);
 	y_res = *(uint16_t *)(0x508A);
 	unsigned char key = 0;
-	printf("\nResolution %d x", &x_res);
-	printf(" %d \n", &y_res);
-	printf("Commands:\nd/a/w/s to rotate the cube\nq to go back to shell\nPress SPACE to continue.", 0);
+	debug_print("\nResolution %d x", &x_res);
+	debug_print(" %d \n", &y_res);
+	debug_print("Commands:\nd/a/w/s to rotate the cube\nq to go back to shell\nPress SPACE to continue.", 0);
 
 	while(key != ASCII_SPACE)
 	{
