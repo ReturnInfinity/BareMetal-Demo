@@ -40,6 +40,9 @@ void printHelp(void) {
 	debug_print("\nModelviewer: example program for small3dlib.\n\n", 0);
 
 	debug_print("contols:\n", 0);
+	debug_print("  arrows           rotate\n", 0);
+	debug_print("  ctrl + U/D       go closer/further\n", 0);
+	debug_print("  ctrl + L/R       zoom (FOV) closer/further\n", 0);
 	debug_print("  space            next model\n", 0);
 	debug_print("  0 - 5            set display mode\n", 0);
 	debug_print("  w                toggle wireframe\n", 0);
