@@ -20,4 +20,4 @@ start:					; Start of program label
 	call [b_output]			; Print the string that RSI points to
 	ret				; Return to OS
 
-hello_message: db 13, 'Hello, world!', 0
+hello_message: db 10, 'Hello, world!', 0

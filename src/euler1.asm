@@ -50,7 +50,7 @@ add_counter:
 
 	ret				; Return to OS
 
-message: db 13, 'Sum of multiples of 3 or 5 below 1000: ', 0
+message: db 10, 'Sum of multiples of 3 or 5 below 1000: ', 0
 sum: dq 0
 counter: dq 1
 

@@ -280,20 +280,20 @@ dump_al:
 
 
 ; Strings
-startstring: db 13, 'SysTest', 13, '========', 13, '1 - SMP Test', 13, '2 - Memory Test', 13, '3 - Network Test', 13, 'q - Quit', 13, 'Enter selection: ', 0
-smpteststring: db 13, 'SMP Test', 13, 'A message from each core should be displayed', 0
-smptestmessage: db 13, 'Hello from core 0x', 0
-memteststring: db 13, 'Memory Test', 13, 'Starting at 0x', 0
+startstring: db 10, 'SysTest', 10, '========', 10, '1 - SMP Test', 10, '2 - Memory Test', 10, '3 - Network Test', 10, 'q - Quit', 10, 'Enter selection: ', 0
+smpteststring: db 10, 'SMP Test', 10, 'A message from each core should be displayed', 0
+smptestmessage: db 10, 'Hello from core 0x', 0
+memteststring: db 10, 'Memory Test', 10, 'Starting at 0x', 0
 memteststring2: db ', testing up to ', 0
-memtesterror: db 13, 'Error at ', 0
-memtesterror2: db 13, 'Ending test early', 0
-netteststring: db 13, 'Network Test', 13, 'Press S to send a packet, Q to quit.', 13, 'Received packets will display automatically', 0
-nettestsendstring: db 13, 'Sending packet.', 0
-nettestreceivestring: db 13, 'Received packet: ', 0
-donestring: db 13, 'Done!', 13, 0
+memtesterror: db 10, 'Error at ', 0
+memtesterror2: db 10, 'Ending test early', 0
+netteststring: db 10, 'Network Test', 10, 'Press S to send a packet, Q to quit.', 10, 'Received packets will display automatically', 0
+nettestsendstring: db 10, 'Sending packet.', 0
+nettestreceivestring: db 10, 'Received packet: ', 0
+donestring: db 10, 'Done!', 10, 0
 hextable: db '0123456789ABCDEF'
 space: db ' ', 0
-newline: db 13, 0
+newline: db 10, 0
 outputlock: dq 0
 tchar: db 0, 0, 0
 
