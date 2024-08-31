@@ -8,32 +8,25 @@ Breakdown by Fabien Sanglard here: https://fabiensanglard.net/rayTracing_back_of
 - Converted from C++ to C
 - Uses built-in math functions for pow, sqrt, ceil, and rand
 
-BareMetal:
-gcc $CFLAGS -o raytrace.o raytrace.c
-ld -T c.ld -o raytrace.app crt0.o raytrace.o libBareMetal.o
-Upon execution it will render the image directly to the screen
-
-*nix:
-gcc raytrace.c -o raytrace
-./raytrace > image.ppm
+Upon execution it will render the image directly to the screen using all CPUs in the system
 
 */
 
 #include <stdint.h>
-// Uncomment line below for *nix
-//#include <stdio.h>
+#include "libBareMetal.h"
+
+#define R1 1103515245
+#define R2 12345
+#define R3 2147483648 // 2^31
+#define RAND_MAX 32767
 
 typedef int i;
 typedef float f;
 unsigned char *frame_buffer;
 int X = 1024;
 int Y = 768;
-
-#define R1 1103515245
-#define R2 12345
-#define R3 2147483648 // 2^31
-#define RAND_MAX 32767
-uint64_t next = 1;
+int progress = 0, TOTALCORES = 0, BSP = 0;
+uint64_t next = 1; // For rand()
 
 // Custom pow
 double bpow(double x, double y) {
@@ -188,24 +181,17 @@ vector S(vector o, vector d) {
 	return v_add(v_init(p, p, p), v_mul(S(h, r), .5));
 }
 
-int main() {
-	// BareMetal
-	frame_buffer = (unsigned char *)(*(uint64_t *)(0x5080)); // Frame buffer address from kernel
-	X = *(uint16_t *)(0x5088); // Screen X
-	Y = *(uint16_t *)(0x508A); // Screen Y
-
-	// *nix
-	//printf("P6 %d %d 255 ", X, Y); // Store PPM header
-
+int render()
+{
+	int y = progress++; // Starting line number
 	vector g = v_norm(v_init(5, -28, 7)); // Camera direction (-/+ = Right/Left, ?/? , Down/Up)
 	vector a = v_mul(v_norm(v_cross(v_init(0, 0, -1), g)), .002); // Camera up vector
 	vector b = v_mul(v_norm(v_cross(g, a)), .002);
 	vector c = v_add(v_add(v_mul(a, -256), v_mul(b, -256)), g);
 
-	for (i y = 0; y<Y; y++)
+	for (; y<Y; y+=TOTALCORES) // Increment by the number of CPUs
 		for (i x = 0; x<X; x++) {
-			// BareMetal
-			int offset = (y * X + x) * 4;
+			int offset = (y * X + x) * 4; // Calculate the offset into video memory for this line
 
 			vector p = v_init(13, 13, 13); // Reuse the vector class to store the RGB values of a pixel
 			for (i r = 64; r--;) {
@@ -213,15 +199,29 @@ int main() {
 				p = v_add(v_mul(S(v_add(v_init(17, 16, 8), t), v_norm(v_add(v_mul(t, -1), v_mul(v_add(v_add(v_mul(a, R() + x), v_mul(b, y + R())), c), 16)))), 3.5), p);
 			}
 
-			// BareMetal
-			frame_buffer[offset++] = (i)p.z;
+			frame_buffer[offset++] = (i)p.z; // Output RGB values directly to video memory
 			frame_buffer[offset++] = (i)p.y;
 			frame_buffer[offset++] = (i)p.x;
 			frame_buffer[offset++] = 0;
-
-			// *nix
-			//printf("%c%c%c", (i)p.x, (i)p.y, (i)p.z);
 		}
+}
+
+int main() {
+	// BareMetal
+	frame_buffer = (unsigned char *)(*(uint64_t *)(0x5080)); // Frame buffer address from kernel
+	X = *(uint16_t *)(0x5088); // Screen X
+	Y = *(uint16_t *)(0x508A); // Screen Y
+	TOTALCORES = *(uint16_t *)(0x5012); // Total cores in the system
+	BSP = *(uint32_t *)(0x5008); // ID of the BSP
+	int tcore;
+
+	for (int t=0; t<TOTALCORES; t++)
+	{
+		tcore = *(uint8_t *)(0x5100+t); // Location of the Active CPU IDs
+		if (tcore != BSP)
+			b_system(SMP_SET, (void *)&render, tcore); // Have each AP render
+	}
+	render(); // Have the BSP render as well
 
 	return 0;
 }
