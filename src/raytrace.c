@@ -6,9 +6,11 @@ Based on Andrew Kensler's business card sized ray tracer
 Breakdown by Fabien Sanglard here: https://fabiensanglard.net/rayTracing_back_of_business_card/
 
 - Converted from C++ to C
-- Uses built-in math functions for pow, sqrt, ceil, and rand
+- Uses built-in functions for pow, sqrt, ceil, and rand
 
-Upon execution it will render the image directly to the screen using all CPUs in the system
+Upon execution it will render the image directly to the screen
+The first run will use only one CPU core
+The second run will use all available CPU cores
 
 */
 
@@ -206,14 +208,44 @@ int render()
 		}
 }
 
+void cls()
+{
+	uint8_t pixel = 0x40;
+	for (int bytes = 0; bytes < (X * Y * 4); bytes++)
+		frame_buffer[bytes] = pixel;
+}
+
 int main() {
-	// BareMetal
 	frame_buffer = (unsigned char *)(*(uint64_t *)(0x5080)); // Frame buffer address from kernel
 	X = *(uint16_t *)(0x5088); // Screen X
 	Y = *(uint16_t *)(0x508A); // Screen Y
+	int tcore;
+	unsigned char c;
+	uint64_t p, q;
+
+	b_output("\nraytrace - First run will be using 1 CPU core\nPress any key to continue", 72);
+
+	c = 0;
+	do {
+		c = b_input();
+	} while (c == 0);
+
+	cls();
+ 
+	TOTALCORES = 1;
+	render();
+
 	TOTALCORES = *(uint16_t *)(0x5012); // Total cores in the system
 	BSP = *(uint32_t *)(0x5008); // ID of the BSP
-	int tcore;
+
+	b_output("\nRender complete. Second run will use all CPU cores\nPress any key to continue", 77);
+
+	c = 0;
+	do {
+		c = b_input();
+	} while (c == 0);
+
+	cls();
 
 	for (int t=0; t<TOTALCORES; t++)
 	{
@@ -222,6 +254,20 @@ int main() {
 			b_system(SMP_SET, (void *)&render, tcore); // Have each AP render
 	}
 	render(); // Have the BSP render as well
+
+	// Wait for all other cores to be finished
+	do {
+		b_system(SMP_BUSY, (void *)&p, (void *)&q);
+	} while (p == 1);
+
+	b_output("\nRender complete. Press any key to exit", 39);
+
+	c = 0;
+	do {
+		c = b_input();
+	} while (c == 0);
+
+	cls();
 
 	return 0;
 }
