@@ -29,6 +29,7 @@ int X = 1024;
 int Y = 768;
 int progress = 0, TOTALCORES = 0, BSP = 0;
 uint64_t next = 1; // For rand()
+unsigned long lock = 0;
 
 // Custom pow
 double bpow(double x, double y) {
@@ -185,7 +186,9 @@ vector S(vector o, vector d) {
 
 int render()
 {
+	b_system(SMP_LOCK, (void *)lock, 0);
 	int y = progress++; // Starting line number
+	b_system(SMP_UNLOCK, (void *)lock, 0);
 	vector g = v_norm(v_init(5, -28, 7)); // Camera direction (-/+ = Right/Left, ?/? , Down/Up)
 	vector a = v_mul(v_norm(v_cross(v_init(0, 0, -1), g)), .002); // Camera up vector
 	vector b = v_mul(v_norm(v_cross(g, a)), .002);
