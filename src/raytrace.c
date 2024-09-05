@@ -133,6 +133,10 @@ f R() {
 	return (f)rand() / RAND_MAX;
 }
 
+// Tracer
+// Return 0 if no hit was found but ray goes up
+// Return 1 if no hit was found but ray goes down
+// Return 2 if a hit was found (and also return distance t and bouncing ray n)
 i T(vector o, vector d, f *t, vector *n) {
 	*t = 1e9;
 	i m = 0;
@@ -161,10 +165,14 @@ i T(vector o, vector d, f *t, vector *n) {
 	return m;
 }
 
+// Sampler
+// Return the pixel color for a ray passing by point o (origin) and d (direction)
 vector S(vector o, vector d) {
 	f t;
 	vector n;
 	i m = T(o, d, &t, &n);
+
+	// Generate a sky color if no sphere is hit and the ray goes up
 	if (!m)
 		return v_mul(v_init(.7, .6, 1), bpow(1 - d.z, 4));
 
@@ -176,11 +184,14 @@ vector S(vector o, vector d) {
 		b = 0;
 
 	f p = bpow(v_dot(l, r) * (b > 0), 99);
+
+	// Generate a floor color if no sphere is hit and the ray goes down
 	if (m & 1) {
 		h = v_mul(h, .2);
 		return v_mul(((i)(bceil(h.x) + bceil(h.y)) & 1) ? v_init(3, 1, 1) : v_init(3, 3, 3), b * .2 + .1);
 	}
 
+	// A sphere was hit.
 	return v_add(v_init(p, p, p), v_mul(S(h, r), .5));
 }
 
