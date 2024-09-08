@@ -29,7 +29,7 @@ systest_wait_for_input:
 systest_smp:
 	lea rsi, [rel smpteststring]
 	call output
-	mov rcx, smp_set		; API Code
+	mov rcx, SMP_SET		; API Code
 	lea rax, [rel smp_task]		; Code for CPU to run
 	xor edx, edx			; Start at ID 0
 systest_smp_startloop:
@@ -39,7 +39,7 @@ systest_smp_startloop:
 	jne systest_smp_startloop
 	call smp_task			; Call the code on this CPU as well
 systest_smp_startwait:
-	mov rcx, smp_busy
+	mov rcx, SMP_BUSY
 	call [b_system]
 	cmp al, 0
 	jne systest_smp_startwait
@@ -177,15 +177,15 @@ systest_end:
 align 16
 smp_task:
 	lea rax, [rel outputlock]	; Location of the mutex
-	mov rcx, smp_lock		; Aquire the lock
+	mov rcx, SMP_LOCK		; Aquire the lock
 	call [b_system]
 	lea rsi, [rel smptestmessage]	; Output the "Hello..." message
 	call output
-	mov rcx, smp_get_id		; Get the APIC ID of the CPU
-	call [b_config]
+	mov rcx, SMP_ID		; Get the APIC ID of the CPU
+	call [b_system]
 	call dump_al
 	lea rax, [rel outputlock]
-	mov rcx, smp_unlock		; Release the mutex
+	mov rcx, SMP_UNLOCK		; Release the mutex
 	call [b_system]
 	ret
 ; -----------------------------------------------------------------------------

@@ -14,7 +14,7 @@ start:
 	mov rsi, startstring
 	mov rcx, 8
 	call [b_output]
-	mov rcx, smp_set		; API Code
+	mov rcx, SMP_SET		; API Code
 	mov rax, smp_task		; Code for CPU to run
 	xor edx, edx			; Start at ID 0
 startloop:
@@ -24,7 +24,7 @@ startloop:
 	jne startloop
 	call smp_task			; Call the code on this CPU as well
 startwait:
-	mov rcx, smp_busy
+	mov rcx, SMP_BUSY
 	call [b_system]
 	cmp al, 0
 	jne startwait
@@ -35,16 +35,16 @@ startwait:
 align 16
 smp_task:
 	mov rax, outputlock		; Location of the mutex
-	mov rcx, smp_lock		; Aquire the lock
+	mov rcx, SMP_LOCK		; Aquire the lock
 	call [b_system]
 	mov rsi, message		; Output the "Hello..." message
 	mov rcx, 19
 	call [b_output]
-	mov rcx, smp_get_id		; Get the APIC ID of the CPU
-	call [b_config]
+	mov rcx, SMP_ID			; Get the APIC ID of the CPU
+	call [b_system]
 	call dump_al
 	mov rax, outputlock
-	mov rcx, smp_unlock		; Release the mutex
+	mov rcx, SMP_UNLOCK		; Release the mutex
 	call [b_system]
 	ret
 
