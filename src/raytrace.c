@@ -14,7 +14,6 @@ The second run will use all available CPU cores
 
 */
 
-#include <stdint.h>
 #include "libBareMetal.h"
 
 #define R1 1103515245
@@ -24,12 +23,11 @@ The second run will use all available CPU cores
 
 typedef int i;
 typedef float f;
-unsigned char *frame_buffer;
-int X = 1024;
-int Y = 768;
-int progress = 0, TOTALCORES = 0, BSP = 0;
-uint64_t next = 1; // For rand()
-unsigned long lock = 0;
+u8 *frame_buffer;
+u16 X, Y;
+u32 progress = 0, TOTALCORES = 0, BSP;
+u64 next = 1; // For rand()
+u64 lock = 0;
 
 // Custom pow
 double bpow(double x, double y) {
@@ -224,18 +222,18 @@ int render()
 
 void cls()
 {
-	uint8_t pixel = 0x40;
+	u8 pixel = 0x40;
 	for (int bytes = 0; bytes < (X * Y * 4); bytes++)
 		frame_buffer[bytes] = pixel;
 }
 
 int main() {
-	frame_buffer = (unsigned char *)(*(uint64_t *)(0x5080)); // Frame buffer address from kernel
-	X = *(uint16_t *)(0x5088); // Screen X
-	Y = *(uint16_t *)(0x508A); // Screen Y
+	frame_buffer = (u8 *)(*(u64 *)(0x5080)); // Frame buffer address from kernel
+	X = *(u16 *)(0x5088); // Screen X
+	Y = *(u16 *)(0x508A); // Screen Y
 	int tcore;
-	unsigned char c;
-	uint64_t p, q;
+	u8 c;
+	int busy;
 
 	b_output("\nraytrace - First run will be using 1 CPU core\nPress any key to continue", 72);
 
@@ -249,8 +247,8 @@ int main() {
 	TOTALCORES = 1;
 	render();
 
-	TOTALCORES = *(uint16_t *)(0x5012); // Total cores in the system
-	BSP = *(uint32_t *)(0x5008); // ID of the BSP
+	TOTALCORES = *(u16 *)(0x5012); // Total cores in the system
+	BSP = *(u32 *)(0x5008); // ID of the BSP
 
 	b_output("\nRender complete. Second run will use all CPU cores\nPress any key to continue", 77);
 
@@ -263,7 +261,7 @@ int main() {
 
 	for (int t=0; t<TOTALCORES; t++)
 	{
-		tcore = *(uint8_t *)(0x5100+t); // Location of the Active CPU IDs
+		tcore = *(u8 *)(0x5100+t); // Location of the Active CPU IDs
 		if (tcore != BSP)
 			b_system(SMP_SET, (void *)&render, tcore); // Have each AP render
 	}
@@ -271,8 +269,8 @@ int main() {
 
 	// Wait for all other cores to be finished
 	do {
-		b_system(SMP_BUSY, (void *)&p, (void *)&q);
-	} while (p == 1);
+		busy = b_system(SMP_BUSY, 0, 0);
+	} while (busy == 1);
 
 	b_output("\nRender complete. Press any key to exit", 39);
 

@@ -6,12 +6,6 @@
 /* Global Includes */
 #include "libBareMetal.h"
 
-/* Typedefs */
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef unsigned long long u64;
-
 /* Global functions */
 u16 checksum(u8* data, u16 bytes);
 u16 checksum_tcp(u8* data, u16 bytes, u16 protocol, u16 length);
