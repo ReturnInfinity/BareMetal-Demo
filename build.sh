@@ -9,6 +9,7 @@ nasm euler1.asm -o ../bin/euler1.app
 nasm ethtest.asm -o ../bin/ethtest.app
 nasm smptest.asm -o ../bin/smptest.app
 nasm systest.asm -o ../bin/systest.app
+nasm uitest.asm -o ../bin/uitest.app
 if [ "$(uname)" != "Darwin" ]; then
 	gcc $CFLAGS -o crt0.o crt0.c
 	gcc $CFLAGS -o libBareMetal.o libBareMetal.c
