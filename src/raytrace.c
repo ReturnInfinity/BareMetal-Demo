@@ -245,7 +245,7 @@ int main() {
 	} while (c == 0);
 
 	cls();
- 
+
 	TOTALCORES = 1;
 	render();
 
