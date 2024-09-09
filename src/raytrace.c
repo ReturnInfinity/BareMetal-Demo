@@ -25,9 +25,9 @@ typedef int i;
 typedef float f;
 u8 *frame_buffer;
 u16 X, Y;
-u32 progress = 0, TOTALCORES = 0, BSP;
+u32 progress = 0;
 u64 next = 1; // For rand()
-u64 lock = 0;
+u64 lock = 0, TOTALCORES = 0, BSP;
 
 // Custom pow
 double bpow(double x, double y) {
@@ -195,9 +195,9 @@ vector S(vector o, vector d) {
 
 int render()
 {
-	b_system(SMP_LOCK, (void *)lock, 0);
+	b_system(SMP_LOCK, lock, 0);
 	int y = progress++; // Starting line number
-	b_system(SMP_UNLOCK, (void *)lock, 0);
+	b_system(SMP_UNLOCK, lock, 0);
 	vector g = v_norm(v_init(5, -28, 7)); // Camera direction (-/+ = Right/Left, ?/? , Down/Up)
 	vector a = v_mul(v_norm(v_cross(v_init(0, 0, -1), g)), .002); // Camera up vector
 	vector b = v_mul(v_norm(v_cross(g, a)), .002);
@@ -228,9 +228,9 @@ void cls()
 }
 
 int main() {
-	frame_buffer = (u8 *)(*(u64 *)(0x5080)); // Frame buffer address from kernel
-	X = *(u16 *)(0x5088); // Screen X
-	Y = *(u16 *)(0x508A); // Screen Y
+	frame_buffer = (u8 *)b_system(SCREEN_LFB_GET, 0, 0); // Frame buffer address from kernel
+	X = b_system(SCREEN_X_GET, 0, 0); // Screen X
+	Y = b_system(SCREEN_Y_GET, 0, 0); // Screen Y
 	int tcore;
 	u8 c;
 	int busy;
@@ -247,8 +247,8 @@ int main() {
 	TOTALCORES = 1;
 	render();
 
-	TOTALCORES = *(u16 *)(0x5012); // Total cores in the system
-	BSP = *(u32 *)(0x5008); // ID of the BSP
+	TOTALCORES = b_system(SMP_NUMCORES, 0, 0); // Total cores in the system
+	BSP = b_system(SMP_ID, 0, 0); // ID of the BSP
 
 	b_output("\nRender complete. Second run will use all CPU cores\nPress any key to continue", 77);
 
@@ -263,7 +263,7 @@ int main() {
 	{
 		tcore = *(u8 *)(0x5100+t); // Location of the Active CPU IDs
 		if (tcore != BSP)
-			b_system(SMP_SET, (void *)&render, tcore); // Have each AP render
+			b_system(SMP_SET, (u64)render, tcore); // Have each AP render
 	}
 	render(); // Have the BSP render as well
 
