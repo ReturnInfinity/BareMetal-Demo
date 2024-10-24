@@ -468,7 +468,7 @@ int net_init()
 {
 	/* Populate the MAC Address */
 	/* Pulls the MAC from the OS sys var table... so gross */
-	char * os_MAC = (void*)0x110050;
+	char * os_MAC = (void*)0x110048;
 	src_MAC[0] = os_MAC[0];
 	src_MAC[1] = os_MAC[1];
 	src_MAC[2] = os_MAC[2];
