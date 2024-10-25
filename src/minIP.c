@@ -466,15 +466,17 @@ u16 checksum_tcp(u8* data, u16 bytes, u16 protocol, u16 length)
 /* net_init - Initialize a raw socket */
 int net_init()
 {
-	/* Populate the MAC Address */
-	/* Pulls the MAC from the OS sys var table... so gross */
-	char * os_MAC = (void*)0x110048;
-	src_MAC[0] = os_MAC[0];
-	src_MAC[1] = os_MAC[1];
-	src_MAC[2] = os_MAC[2];
-	src_MAC[3] = os_MAC[3];
-	src_MAC[4] = os_MAC[4];
-	src_MAC[5] = os_MAC[5];
+	u64 val0 = 0, val1 = 0, val2 = 0;
+	val0 = b_system(MAC_GET, val1, val2); // Get the MAC as a u64
+	char * MAC = (void*)&val0;
+
+	src_MAC[0] = MAC[5]; // Get the MAC bytes in the correct order
+	src_MAC[1] = MAC[4];
+	src_MAC[2] = MAC[3];
+	src_MAC[3] = MAC[2];
+	src_MAC[4] = MAC[1];
+	src_MAC[5] = MAC[0];
+
 	return 0;
 }
 
