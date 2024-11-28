@@ -7,8 +7,8 @@ if [ -x "$(command -v curl)" ]; then
 	curl -s -o libBareMetal.asm https://raw.githubusercontent.com/ReturnInfinity/BareMetal/master/api/libBareMetal.asm
 	curl -s -o libBareMetal.c https://raw.githubusercontent.com/ReturnInfinity/BareMetal/master/api/libBareMetal.c
 	curl -s -o libBareMetal.h https://raw.githubusercontent.com/ReturnInfinity/BareMetal/master/api/libBareMetal.h
-	curl -s -o libBareMetal.asm https://raw.githubusercontent.com/ReturnInfinity/BareMetal-Monitor/master/api/lib-ui.asm
-	curl -s -o libBareMetal.h https://raw.githubusercontent.com/ReturnInfinity/BareMetal-Monitor/master/api/lib-ui.h
+	curl -s -o lib-ui.asm https://raw.githubusercontent.com/ReturnInfinity/BareMetal-Monitor/master/api/lib-ui.asm
+	curl -s -o lib-ui.h https://raw.githubusercontent.com/ReturnInfinity/BareMetal-Monitor/master/api/lib-ui.h
 else
 	wget -q https://raw.githubusercontent.com/ReturnInfinity/BareMetal/master/api/libBareMetal.asm
 	wget -q https://raw.githubusercontent.com/ReturnInfinity/BareMetal/master/api/libBareMetal.c
