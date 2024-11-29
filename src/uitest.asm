@@ -16,7 +16,7 @@ start:					; Start of program label
 	mov cl, 0x11
 	call [b_user]
 	lea rsi, [rel test_message]	; Load RSI with the relative memory address of string
-	mov ecx, 4			; Output 14 characters
+	mov ecx, 4			; Output 4 characters
 	call [b_output]			; Print the string that RSI points to
 
 	lea rsi, [rel newline]		; Load RSI with the relative memory address of string
@@ -27,7 +27,7 @@ start:					; Start of program label
 	mov cl, 0x11
 	call [b_user]
 	lea rsi, [rel test_message]	; Load RSI with the relative memory address of string
-	mov ecx, 4			; Output 14 characters
+	mov ecx, 4			; Output 4 characters
 	call [b_output]			; Print the string that RSI points to
 
 	lea rsi, [rel newline]		; Load RSI with the relative memory address of string
@@ -38,7 +38,7 @@ start:					; Start of program label
 	mov cl, 0x11
 	call [b_user]
 	lea rsi, [rel test_message]	; Load RSI with the relative memory address of string
-	mov ecx, 4			; Output 14 characters
+	mov ecx, 4			; Output 4 characters
 	call [b_output]			; Print the string that RSI points to
 
 	mov eax, 0x00FF00FF
@@ -54,7 +54,7 @@ start:					; Start of program label
 	mov cl, 0x14
 	call [b_user]
 	lea rsi, [rel test_message]	; Load RSI with the relative memory address of string
-	mov ecx, 4			; Output 14 characters
+	mov ecx, 4			; Output 4 characters
 	call [b_output]			; Print the string that RSI points to
 
 ;fill:
