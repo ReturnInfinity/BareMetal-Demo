@@ -37,6 +37,7 @@ mouse_loop:
 	call [b_input]
 	cmp al, 'q'
 	je end
+
 	; Set cursor
 	xor eax, eax
 	mov al, [x]
@@ -46,13 +47,22 @@ mouse_loop:
 	mov cl, 0x14
 	call [b_user]
 
-	mov al, [0x110405]
-	call dump_al			; dump buttons
+	mov ecx, 0x02			; Return mouse state (YYYYXXXXBBBBCCCC)
+	call [b_system]
+	mov rdx, rax			; Save mouse data to RDX
 
 	lea rsi, [rel space]
 	call output
 
-	mov ax, [0x110406]
+	mov rax, rdx
+	shr rax, 16
+	call dump_ax			; dump buttons
+
+	lea rsi, [rel space]
+	call output
+
+	mov rax, rdx
+	shr rax, 32
 	call dump_ax			; dump x
 	xor ebx, ebx
 	mov bx, ax
@@ -60,7 +70,8 @@ mouse_loop:
 	lea rsi, [rel space]
 	call output
 
-	mov ax, [0x110408]
+	mov rax, rdx
+	shr rax, 48
 	call dump_ax			; dump y
 	shl ebx, 16
 	mov bx, ax
@@ -69,20 +80,8 @@ mouse_loop:
 	lea rsi, [rel space]
 	call output
 
-	mov ax, [0x11040A]
-	call dump_ax			; dump z
-
-	lea rsi, [rel space]
-	call output
-
-	mov al, [0x110404]
+	ror rax, 16
 	call dump_al			; dump count
-
-	lea rsi, [rel space]
-	call output
-
-	mov eax, [0x110400]
-	call dump_eax			; dump packet
 
 	; Draw mouse cursor
 	mov eax, 0x00FFFFFF
