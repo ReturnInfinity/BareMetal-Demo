@@ -43,7 +43,6 @@ mouse_program_loop:
 	call [b_input]
 	cmp al, 'q'
 	je end
-
 	jmp mouse_program_loop
 
 end:
@@ -70,7 +69,7 @@ mouse_update:
 	mov cl, 0x14
 	call [b_user]
 
-	mov ecx, 0x02			; Return mouse state (CCCCYYYYXXXXBBBB)
+	mov ecx, GET_MOUSE		; Return mouse state (CCCCYYYYXXXXBBBB)
 	call [b_system]
 	mov rdx, rax			; Save mouse data to RDX
 
