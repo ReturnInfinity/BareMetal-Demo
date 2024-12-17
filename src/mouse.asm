@@ -2,6 +2,7 @@
 ; Written by Ian Seyler
 
 [BITS 64]
+[ORG 0xFFFF800000000000]
 
 %INCLUDE "libBareMetal.asm"
 
@@ -33,10 +34,32 @@ start:					; Start of program label
 	call [b_system]
 	mov [VideoPPSL], eax
 
-mouse_loop:
+	; Set a callback handler on mouse activity
+	mov rax, mouse_update
+	mov ecx, CALLBACK_MOUSE
+	call [b_system]
+
+mouse_program_loop:
 	call [b_input]
 	cmp al, 'q'
 	je end
+
+	jmp mouse_program_loop
+
+end:
+	; Clear the mouse callback
+	xor eax, eax
+	mov ecx, CALLBACK_MOUSE
+	call [b_system]
+	ret				; Return to OS
+
+align 16
+mouse_update:
+	push rsi
+	push rdx
+	push rcx
+	push rbx
+	push rax
 
 	; Set cursor
 	xor eax, eax
@@ -84,14 +107,14 @@ mouse_loop:
 
 	; Draw mouse cursor
 	mov eax, 0x00FFFFFF
-;	mov ebx, 0x00100010
-	call pixel
+	call pixel			; EBX is set to the pixel location already
 
-	jmp mouse_loop
-
-end:
-	ret				; Return to OS
-
+	pop rax
+	pop rbx
+	pop rcx
+	pop rdx
+	pop rsi
+	ret
 
 ; -----------------------------------------------------------------------------
 ; output -- Displays text
@@ -222,6 +245,7 @@ pixel:
 startstring: db 10, 'Mouse Test - q to quit', 10, '========', 10, 0
 hextable: db '0123456789ABCDEF'
 space: db ' ', 0
+update: db 'u', 0
 newline: db 10, 0
 outputlock: dq 0
 tchar: db 0, 0, 0
