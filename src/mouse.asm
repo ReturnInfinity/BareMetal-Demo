@@ -47,7 +47,7 @@ mouse_loop:
 	mov cl, 0x14
 	call [b_user]
 
-	mov ecx, 0x02			; Return mouse state (YYYYXXXXBBBBCCCC)
+	mov ecx, 0x02			; Return mouse state (CCCCYYYYXXXXBBBB)
 	call [b_system]
 	mov rdx, rax			; Save mouse data to RDX
 
@@ -55,14 +55,13 @@ mouse_loop:
 	call output
 
 	mov rax, rdx
-	shr rax, 16
 	call dump_ax			; dump buttons
 
 	lea rsi, [rel space]
 	call output
 
 	mov rax, rdx
-	shr rax, 32
+	shr rax, 16
 	call dump_ax			; dump x
 	xor ebx, ebx
 	mov bx, ax
@@ -71,7 +70,7 @@ mouse_loop:
 	call output
 
 	mov rax, rdx
-	shr rax, 48
+	shr rax, 32
 	call dump_ax			; dump y
 	shl ebx, 16
 	mov bx, ax
