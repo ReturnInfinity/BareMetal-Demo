@@ -55,7 +55,8 @@ systest_mem:
 	call dump_rax
 	lea rsi, [rel memteststring2]
 	call output
-	mov eax, [0x00110104]
+	mov rcx, FREE_MEMORY		; 32-bit - Amount of free RAM in MiBs
+	call [b_system]
 	shl rax, 20			; Convert MiB to Bytes
 	dec rax				; Decrement by 1 Byte
 	add rax, rdi

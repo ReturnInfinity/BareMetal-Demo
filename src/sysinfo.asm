@@ -191,9 +191,8 @@ endit:
 ; RAM
 	mov rsi, memmessage
 	call output
-	xor rax, rax
-	mov rsi, 0x5020
-	lodsw
+	mov rcx, FREE_MEMORY		; 32-bit - Amount of free RAM in MiBs
+	call [b_system]
 	mov rdi, tstring
 	call int_to_string
 	mov rsi, tstring
@@ -525,7 +524,7 @@ sse41: db 'SSE4.1 ', 0
 sse42: db 'SSE4.2 ', 0
 aes: db 'AES ', 0
 avx: db 'AVX ', 0
-memmessage: db 10, 'RAM: ', 0
+memmessage: db 10, 'Free Memory: ', 0
 stomessage: db 10, 'Storage:', 0
 nvmemessage: db 10, 'NVMe - ', 0
 ahcimessage: db 10, 'AHCI - ', 0
