@@ -22,6 +22,8 @@ systest_wait_for_input:
 	je systest_mem
 	cmp al, '3'
 	je systest_net
+	cmp al, '4'
+	je systest_sto
 	cmp al, 'q'
 	je systest_end
 	jmp systest_wait_for_input
@@ -168,6 +170,57 @@ systest_net_receive_type:
 	pop rsi
 	jmp systest_net_main
 
+systest_sto:
+	lea rsi, [rel stoteststring]
+	call output
+
+	; Create 2MiB of test data
+	mov rdi, 0xFFFF800000400000	; Test memory
+	mov edx, 0
+	mov ecx, TSC
+systest_sto_create_data:	
+	call [b_system]			; Return TSC in RAX
+	stosq
+	inc edx
+	cmp edx, 262144
+	jne systest_sto_create_data
+
+	; Write 2MiB of test data to disk
+	xor edx, edx
+	mov rsi, 0xFFFF800000400000
+	mov ecx, 512			; 2MiB (512 4096-byte sectors)
+	mov eax, 32768			; start 128MiB into disk
+	call [b_storage_write]
+
+	; Read 2MiB from disk
+	xor edx, edx
+	mov rdi, 0xFFFF800000600000
+	mov ecx, 512			; 2MiB (512 4096-byte sectors)
+	mov eax, 32768			; start 128MiB into disk
+	call [b_storage_read]
+
+	; Compare 2MiB of data in memory
+	mov ecx, 262144
+	mov rsi, 0xFFFF800000400000
+	mov rdi, 0xFFFF800000600000
+systest_sto_compare:
+	mov rax, [rsi]
+	mov rbx, [rdi]
+	cmp rax, rbx
+	jne systest_sto_error
+	dec ecx
+	jnz systest_sto_compare
+	
+systest_sto_finish:
+	lea rsi, [rel donestring]
+	call output
+	jmp start
+
+systest_sto_error:
+	lea rsi, [rel stotesterror]
+	call output
+	jmp start
+
 systest_end:
 	ret
 
@@ -281,7 +334,7 @@ dump_al:
 
 
 ; Strings
-startstring: db 10, 'SysTest', 10, '========', 10, '1 - SMP Test', 10, '2 - Memory Test', 10, '3 - Network Test', 10, 'q - Quit', 10, 'Enter selection: ', 0
+startstring: db 10, 'SysTest', 10, '========', 10, '1 - SMP Test', 10, '2 - Memory Test', 10, '3 - Network Test', 10, '4 - Storage Test', 10, 'q - Quit', 10, 'Enter selection: ', 0
 smpteststring: db 10, 'SMP Test', 10, 'A message from each core should be displayed', 0
 smptestmessage: db 10, 'Hello from core 0x', 0
 memteststring: db 10, 'Memory Test', 10, 'Starting at 0x', 0
@@ -291,6 +344,8 @@ memtesterror2: db 10, 'Ending test early', 0
 netteststring: db 10, 'Network Test', 10, 'Press S to send a packet, Q to quit.', 10, 'Received packets will display automatically', 0
 nettestsendstring: db 10, 'Sending packet.', 0
 nettestreceivestring: db 10, 'Received packet: ', 0
+stoteststring: db 10, 'Storage Test', 10, 'Starting at sector 0x', 0
+stotesterror: db 10, 'Data mismatch!', 0
 donestring: db 10, 'Done!', 10, 0
 hextable: db '0123456789ABCDEF'
 space: db ' ', 0
