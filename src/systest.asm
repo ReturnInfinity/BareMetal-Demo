@@ -173,9 +173,14 @@ systest_net_receive_type:
 systest_sto:
 	lea rsi, [rel stoteststring]
 	call output
+	mov r8, 32768			; Starting sector variable. 128MiB into the disk
+	call dump_rax
 
+	; Get disk information (maximum sector)
+
+systest_sto_next:
 	; Create 2MiB of test data
-	mov rdi, 0xFFFF800000400000	; Test memory
+	mov rdi, 0xFFFF800000200000	; Test memory
 	mov edx, 0
 	mov ecx, TSC
 systest_sto_create_data:	
@@ -187,22 +192,22 @@ systest_sto_create_data:
 
 	; Write 2MiB of test data to disk
 	xor edx, edx
-	mov rsi, 0xFFFF800000400000
+	mov rsi, 0xFFFF800000200000
 	mov ecx, 512			; 2MiB (512 4096-byte sectors)
-	mov eax, 32768			; start 128MiB into disk
+	mov rax, r8
 	call [b_storage_write]
 
 	; Read 2MiB from disk
 	xor edx, edx
-	mov rdi, 0xFFFF800000600000
+	mov rdi, 0xFFFF800000400000
 	mov ecx, 512			; 2MiB (512 4096-byte sectors)
-	mov eax, 32768			; start 128MiB into disk
+	mov rax, r8
 	call [b_storage_read]
 
 	; Compare 2MiB of data in memory
 	mov ecx, 262144
-	mov rsi, 0xFFFF800000400000
-	mov rdi, 0xFFFF800000600000
+	mov rsi, 0xFFFF800000200000
+	mov rdi, 0xFFFF800000400000
 systest_sto_compare:
 	mov rax, [rsi]
 	mov rbx, [rdi]
@@ -210,6 +215,10 @@ systest_sto_compare:
 	jne systest_sto_error
 	dec ecx
 	jnz systest_sto_compare
+	add r8, 512
+	lea rsi, [rel period]
+	call output
+	jmp systest_sto_next
 	
 systest_sto_finish:
 	lea rsi, [rel donestring]
@@ -235,7 +244,7 @@ smp_task:
 	call [b_system]
 	lea rsi, [rel smptestmessage]	; Output the "Hello..." message
 	call output
-	mov rcx, SMP_ID		; Get the APIC ID of the CPU
+	mov rcx, SMP_ID			; Get the APIC ID of the CPU
 	call [b_system]
 	call dump_al
 	lea rax, [rel outputlock]
@@ -252,8 +261,8 @@ smp_task:
 output:
 	push rcx
 
-	call string_length	; Calculate the string length
-	call [b_output]		; Output the string via the kernel syscall
+	call string_length		; Calculate the string length
+	call [b_output]			; Output the string via the kernel syscall
 
 	pop rcx
 	ret
@@ -349,6 +358,7 @@ stotesterror: db 10, 'Data mismatch!', 0
 donestring: db 10, 'Done!', 10, 0
 hextable: db '0123456789ABCDEF'
 space: db ' ', 0
+period: db '.', 0
 newline: db 10, 0
 outputlock: dq 0
 tchar: db 0, 0, 0
