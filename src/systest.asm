@@ -190,19 +190,19 @@ systest_sto_create_data:
 	cmp edx, 262144
 	jne systest_sto_create_data
 
-	; Write 2MiB of test data to disk
+	; Write 2MiB of test data to storage
 	xor edx, edx
 	mov rsi, 0xFFFF800000200000
 	mov ecx, 512			; 2MiB (512 4096-byte sectors)
 	mov rax, r8
-	call [b_storage_write]
+	call [b_nvs_write]
 
-	; Read 2MiB from disk
+	; Read 2MiB from storage
 	xor edx, edx
 	mov rdi, 0xFFFF800000400000
 	mov ecx, 512			; 2MiB (512 4096-byte sectors)
 	mov rax, r8
-	call [b_storage_read]
+	call [b_nvs_read]
 
 	; Compare 2MiB of data in memory
 	mov ecx, 262144
