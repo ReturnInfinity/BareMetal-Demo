@@ -12,6 +12,10 @@ start:
 	lea rsi, [rel startstring]
 	call output
 
+	xor eax, eax
+	mov [packet_count], rax
+	mov [byte_count], rax
+
 systest_wait_for_input:
 	call [b_input]
 	or al, 00100000b		; Convert to lowercase
@@ -114,6 +118,14 @@ systest_net_main:
 	jmp systest_net_main
 
 systest_net_finish:
+	lea rsi, [rel nettestreceivestring]
+	call output
+	mov rax, [packet_count]
+	call dump_rax
+	lea rsi, [rel nettestreceivestring2]
+	call output
+	mov rax, [byte_count]
+	call dump_rax
 	jmp start
 
 systest_net_send:
@@ -125,49 +137,8 @@ systest_net_send:
 	jmp systest_net_main
 
 systest_net_receive:
-	lea rsi, [rel nettestreceivestring]
-	call output
-	lea rsi, [rel buffer]
-
-	; Output the destination MAC
-	mov rcx, 6
-systest_net_receive_dest:	
-	lodsb
-	call dump_al
-	sub rcx, 1
-	cmp rcx, 0
-	jne systest_net_receive_dest
-	push rsi
-	lea rsi, [rel space]
-	call output
-	pop rsi
-
-	; Output the source MAC
-	mov rcx, 6
-systest_net_receive_src:
-	lodsb
-	call dump_al
-	sub rcx, 1
-	cmp rcx, 0
-	jne systest_net_receive_src
-	push rsi
-	lea rsi, [rel space]
-	call output
-	pop rsi
-
-	; Output the EtherType
-systest_net_receive_type:
-	lodsb
-	mov bl, al
-	shl bx, 8
-	call dump_al
-	lodsb
-	mov bl, al
-	call dump_al
-	push rsi
-	lea rsi, [rel space]
-	call output
-	pop rsi
+	inc qword [packet_count]
+	add [byte_count], rcx
 	jmp systest_net_main
 
 systest_sto:
@@ -350,9 +321,10 @@ memteststring: db 10, 'Memory Test', 10, 'Starting at 0x', 0
 memteststring2: db ', testing up to ', 0
 memtesterror: db 10, 'Error at ', 0
 memtesterror2: db 10, 'Ending test early', 0
-netteststring: db 10, 'Network Test', 10, 'Press S to send a packet, Q to quit.', 10, 'Received packets will display automatically', 0
+netteststring: db 10, 'Network Test', 10, 'Press S to send a packet, Q to quit.', 10, 0
 nettestsendstring: db 10, 'Sending packet.', 0
-nettestreceivestring: db 10, 'Received packet: ', 0
+nettestreceivestring: db 'Received packets: ', 0
+nettestreceivestring2: db 10, 'Received bytes: ', 0
 stoteststring: db 10, 'Storage Test', 10, 'Starting at sector 0x', 0
 stotesterror: db 10, 'Data mismatch!', 0
 donestring: db 10, 'Done!', 10, 0
@@ -362,6 +334,8 @@ period: db '.', 0
 newline: db 10, 0
 outputlock: dq 0
 tchar: db 0, 0, 0
+packet_count: dq 0
+byte_count: dq 0
 
 align 16
 
