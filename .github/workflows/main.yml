@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: nasm
+      run: brew install nasm
+
+    - name: setup
+      run: ./baremetal.sh setup
+
+    - name: build
+      run: ./baremetal.sh build
+
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: install nasm
+      run: sudo apt install nasm
+
+    - name: setup
+      run: ./baremetal.sh setup
+
+    - name: build
+      run: ./baremetal.sh build
+      
