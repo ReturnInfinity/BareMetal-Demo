@@ -43,3 +43,21 @@ jobs:
     - name: build
       run: ./build.sh
 
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: install packages
+      run: choco install nasm mingw
+
+    - name: setup
+      run: ./setup.sh
+
+    - name: build
+      run: ./build.sh
+
+      
