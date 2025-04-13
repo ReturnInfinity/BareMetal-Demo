@@ -15,7 +15,10 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: nasm
-      run: brew install nasm
+      run: brew install nasm 
+
+    - name: x86_64-elf-gcc
+      run: brew install x86_64-elf-gcc
 
     - name: setup
       run: ./setup.sh
