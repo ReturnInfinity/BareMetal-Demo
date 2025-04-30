@@ -182,8 +182,14 @@ checkaes:
 
 checkavx:
 	test ecx, 00010000000000000000000000000000b
-	jz endit
+	jz checkx2apic
 	mov rsi, avx
+	call output
+
+checkx2apic:
+	test ecx, 00000000001000000000000000000000b
+	jz endit
+	mov rsi, x2apic
 	call output
 
 endit:
@@ -524,6 +530,7 @@ sse41: db 'SSE4.1 ', 0
 sse42: db 'SSE4.2 ', 0
 aes: db 'AES ', 0
 avx: db 'AVX ', 0
+x2apic: db 'x2APIC ',0
 memmessage: db 10, 'Free Memory: ', 0
 stomessage: db 10, 'Storage:', 0
 nvmemessage: db 10, 'NVMe - ', 0
