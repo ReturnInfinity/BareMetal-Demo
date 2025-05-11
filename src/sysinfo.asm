@@ -528,7 +528,7 @@ cpufeatures: db 10, 'CPU features: ', 0
 kbmsg: db ' KiB', 0
 mbmsg: db ' MiB', 0
 mhzmsg: db ' MHz', 0
-htt: db 'HT', 0
+htt: db 'HT ', 0
 sse: db 'SSE ', 0
 sse2: db 'SSE2 ', 0
 sse3: db 'SSE3 ', 0
