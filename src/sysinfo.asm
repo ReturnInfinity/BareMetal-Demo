@@ -138,6 +138,12 @@ print_cpu_string:
 	mov rax, 1
 	cpuid
 
+checkhtt:
+	test edx, 00010000000000000000000000000000b
+	jz checksse
+	mov rsi, htt
+	call output
+
 checksse:
 	test edx, 00000010000000000000000000000000b
 	jz checksse2
@@ -522,6 +528,7 @@ cpufeatures: db 10, 'CPU features: ', 0
 kbmsg: db ' KiB', 0
 mbmsg: db ' MiB', 0
 mhzmsg: db ' MHz', 0
+htt: db 'HT', 0
 sse: db 'SSE ', 0
 sse2: db 'SSE2 ', 0
 sse3: db 'SSE3 ', 0
