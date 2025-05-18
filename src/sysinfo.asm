@@ -132,6 +132,29 @@ print_cpu_string:
 	mov rsi, kbmsg
 	call output
 
+; Address bits
+	mov rsi, physaddrbits
+	call output
+	xor eax, eax
+	mov al, [0x5016]
+	mov rdi, tstring
+	call int_to_string
+	mov rsi, tstring
+	call output
+	mov rsi, bitmsg
+	call output
+
+	mov rsi, virtaddrbits
+	call output
+	xor eax, eax
+	mov al, [0x5017]
+	mov rdi, tstring
+	call int_to_string
+	mov rsi, tstring
+	call output
+	mov rsi, bitmsg
+	call output
+
 ; CPU features
 	mov rsi, cpufeatures
 	call output
@@ -524,10 +547,13 @@ l1ccachemsg: db 10, 'L1 code cache: ', 0
 l1dcachemsg: db 10, 'L1 data cache: ', 0
 l2ucachemsg: db 10, 'L2 unified cache: ', 0
 l3ucachemsg: db 10, 'L3 unified cache: ', 0
+physaddrbits: db 10, 'Physical Address width: ', 0
+virtaddrbits: db 10, 'Virtual Address width: ', 0
 cpufeatures: db 10, 'CPU features: ', 0
 kbmsg: db ' KiB', 0
 mbmsg: db ' MiB', 0
 mhzmsg: db ' MHz', 0
+bitmsg: db '-bit', 0
 htt: db 'HT ', 0
 sse: db 'SSE ', 0
 sse2: db 'SSE2 ', 0
