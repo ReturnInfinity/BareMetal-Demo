@@ -223,15 +223,21 @@ checkx2apic:
 
 checkavx2:
 	mov eax, 0x7
+	xor ecx, ecx
 	cpuid
 	bt ebx, 5			; AVX2
-	jnc checksse4a
+	jnc checkavx512
 	mov rsi, avx2
+	call output
+
+checkavx512:
+	bt ebx, 16			; AVX512F
+	jnc checksse4a
+	mov rsi, avx512
 	call output
 
 checksse4a:
 	mov eax, 0x80000001
-	xor ecx, ecx
 	cpuid
 	bt ecx, 6			; SSE4A
 	jnc endit
