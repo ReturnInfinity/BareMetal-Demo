@@ -231,6 +231,7 @@ checkavx2:
 
 checksse4a:
 	mov eax, 0x80000001
+	xor ecx, ecx
 	cpuid
 	bt ecx, 6			; SSE4A
 	jnc endit
