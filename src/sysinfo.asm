@@ -158,67 +158,83 @@ print_cpu_string:
 ; CPU features
 	mov rsi, cpufeatures
 	call output
-	mov rax, 1
+	mov eax, 0x1
 	cpuid
 
 checkhtt:
-	test edx, 00010000000000000000000000000000b
-	jz checksse
+	bt edx, 28			; HTT
+	jnc checksse
 	mov rsi, htt
 	call output
 
 checksse:
-	test edx, 00000010000000000000000000000000b
-	jz checksse2
+	bt edx, 25			; SSE
+	jnc checksse2
 	mov rsi, sse
 	call output
 
 checksse2:
-	test edx, 00000100000000000000000000000000b
-	jz checksse3
+	bt edx, 26			; SSE2
+	jnc checksse3
 	mov rsi, sse2
 	call output
 
 checksse3:
-	test ecx, 00000000000000000000000000000001b
-	jz checkssse3
+	bt ecx, 0			; SSE3
+	jnc checkssse3
 	mov rsi, sse3
 	call output
 
 checkssse3:
-	test ecx, 00000000000000000000001000000000b
-	jz checksse41
+	bt ecx, 9			; SSSE3
+	jnc checksse41
 	mov rsi, ssse3
 	call output
 
 checksse41:
-	test ecx, 00000000000010000000000000000000b
-	jz checksse42
+	bt ecx, 19			; SSE4.1
+	jnc checksse42
 	mov rsi, sse41
 	call output
 
 checksse42:
-	test ecx, 00000000000100000000000000000000b
-	jz checkaes
+	bt ecx, 20			; SSE4.2
+	jnc checkaes
 	mov rsi, sse42
 	call output
 
 checkaes:
-	test ecx, 00000010000000000000000000000000b
-	jz checkavx
+	bt ecx, 25			; AES
+	jnc checkavx
 	mov rsi, aes
 	call output
 
 checkavx:
-	test ecx, 00010000000000000000000000000000b
-	jz checkx2apic
+	bt ecx, 28			; AVX
+	jnc checkx2apic
 	mov rsi, avx
 	call output
 
 checkx2apic:
-	test ecx, 00000000001000000000000000000000b
-	jz endit
+	bt ecx, 21			; X2APIC
+	jnc checkavx2
 	mov rsi, x2apic
+	call output
+
+checkavx2:
+	mov eax, 0x7
+	cpuid
+	bt ebx, 5			; AVX2
+	jnc checksse4a
+	mov rsi, avx2
+	call output
+
+checksse4a:
+	mov eax, 0x80000001
+	cpuid
+	bt ecx, 6			; SSE4A
+	jnc endit
+	mov rsi, sse4a
 	call output
 
 endit:
@@ -561,8 +577,11 @@ sse3: db 'SSE3 ', 0
 ssse3: db 'SSSE3 ', 0
 sse41: db 'SSE4.1 ', 0
 sse42: db 'SSE4.2 ', 0
+sse4a: db 'SSE4A ', 0
 aes: db 'AES ', 0
 avx: db 'AVX ', 0
+avx2: db 'AVX2 ', 0
+avx512: db 'AVX512 ', 0
 x2apic: db 'x2APIC ',0
 memmessage: db 10, 'Free Memory: ', 0
 stomessage: db 10, 'Storage:', 0
