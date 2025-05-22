@@ -81,6 +81,163 @@ print_cpu_string:
 	mov rsi, mhzmsg
 	call output
 
+cache_standard:
+
+; L1D
+	mov eax, 0x00000004
+	xor ecx, ecx
+	cpuid
+	cmp eax, 0
+	je cache_extended
+	mov eax, ecx
+	inc eax
+	mov ecx, ebx
+	and ecx, 0xFFF
+	add ecx, 1
+	mul ecx
+
+	mov ecx, ebx
+	shr ecx, 12
+	and ecx, 0x3FF
+	cmp ecx, 0
+	jne l1d_skip_partitions
+	add ecx, 1
+	mul ecx
+l1d_skip_partitions:
+
+	mov ecx, ebx
+	shr ecx, 22
+	and ecx, 0x3FF
+	add ecx, 1
+	mul ecx
+	shr eax, 10
+
+	mov rdi, tstring
+	call int_to_string
+	mov rsi, l1dcachemsg
+	call output
+	mov rsi, tstring
+	call output
+	mov rsi, kbmsg
+	call output
+
+; L1C
+	mov eax, 0x00000004
+	mov ecx, 0x00000001
+	cpuid
+
+	mov eax, ecx
+	inc eax
+	mov ecx, ebx
+	and ecx, 0xFFF
+	add ecx, 1
+	mul ecx
+
+	mov ecx, ebx
+	shr ecx, 12
+	and ecx, 0x3FF
+	cmp ecx, 0
+	jne l1c_skip_partitions
+	add ecx, 1
+	mul ecx
+l1c_skip_partitions:
+
+	mov ecx, ebx
+	shr ecx, 22
+	and ecx, 0x3FF
+	add ecx, 1
+	mul ecx
+	shr eax, 10
+
+	mov rdi, tstring
+	call int_to_string
+	mov rsi, l1ccachemsg
+	call output
+	mov rsi, tstring
+	call output
+	mov rsi, kbmsg
+	call output
+
+; L2U
+	mov eax, 0x00000004
+	mov ecx, 0x00000002
+	cpuid
+
+	mov eax, ecx
+	inc eax
+	mov ecx, ebx
+	and ecx, 0xFFF
+	add ecx, 1
+	mul ecx
+
+	mov ecx, ebx
+	shr ecx, 12
+	and ecx, 0x3FF
+	cmp ecx, 0
+	jne l2u_skip_partitions
+	add ecx, 1
+	mul ecx
+l2u_skip_partitions:
+
+	mov ecx, ebx
+	shr ecx, 22
+	and ecx, 0x3FF
+	add ecx, 1
+	mul ecx
+	shr eax, 10
+
+	mov rdi, tstring
+	call int_to_string
+	mov rsi, l2ucachemsg
+	call output
+	mov rsi, tstring
+	call output
+	mov rsi, kbmsg
+	call output
+
+; L3U
+	mov eax, 0x00000004
+	mov ecx, 0x00000003
+	cpuid
+
+	mov eax, ecx
+	inc eax
+	mov ecx, ebx
+	and ecx, 0xFFF
+	add ecx, 1
+	mul ecx
+
+	mov ecx, ebx
+	shr ecx, 12
+	and ecx, 0x3FF
+	cmp ecx, 0
+	jne l3u_skip_partitions
+	add ecx, 1
+	mul ecx
+l3u_skip_partitions:
+
+	mov ecx, ebx
+	shr ecx, 22
+	and ecx, 0x3FF
+	add ecx, 1
+	mul ecx
+	shr eax, 10
+
+	mov rdi, tstring
+	call int_to_string
+	mov rsi, l3ucachemsg
+	call output
+	mov rsi, tstring
+	call output
+	mov rsi, kbmsg
+	call output
+
+	jmp cache_done
+;
+;	int3
+
+cache_extended:
+
 ; L1 code/data cache info
 	mov eax, 0x80000005	; L1 cache info
 	cpuid
@@ -131,6 +288,8 @@ print_cpu_string:
 	call output
 	mov rsi, kbmsg
 	call output
+
+cache_done:
 
 ; Address bits
 	mov rsi, physaddrbits
