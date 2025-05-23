@@ -118,15 +118,7 @@ cache_standard:
 	mul ecx
 
 	shr eax, 10		; Quick divide by 1024 to get KiB
-
-	mov rdi, tstring
-	call int_to_string
-	mov rsi, l1dcachemsg
-	call output
-	mov rsi, tstring
-	call output
-	mov rsi, kbmsg
-	call output
+	mov [l1dcache], eax
 
 ; L1C
 	mov eax, 0x00000004
@@ -153,15 +145,7 @@ cache_standard:
 	mul ecx
 
 	shr eax, 10		; Quick divide by 1024 to get KiB
-
-	mov rdi, tstring
-	call int_to_string
-	mov rsi, l1ccachemsg
-	call output
-	mov rsi, tstring
-	call output
-	mov rsi, kbmsg
-	call output
+	mov [l1ccache], eax
 
 ; L2U
 	mov eax, 0x00000004
@@ -188,15 +172,7 @@ cache_standard:
 	mul ecx
 
 	shr eax, 10		; Quick divide by 1024 to get KiB
-
-	mov rdi, tstring
-	call int_to_string
-	mov rsi, l2ucachemsg
-	call output
-	mov rsi, tstring
-	call output
-	mov rsi, kbmsg
-	call output
+	mov [l2cache], eax
 
 ; L3U
 	mov eax, 0x00000004
@@ -223,37 +199,41 @@ cache_standard:
 	mul ecx
 
 	shr eax, 10		; Quick divide by 1024 to get KiB
-
-	mov rdi, tstring
-	call int_to_string
-	mov rsi, l3ucachemsg
-	call output
-	mov rsi, tstring
-	call output
-	mov rsi, kbmsg
-	call output
+	mov [l3cache], eax
 
 	jmp cache_done
-;
-;	int3
 
 cache_extended:
 
 ; L1 code/data cache info
 	mov eax, 0x80000005	; L1 cache info
 	cpuid
-	mov eax, edx		; EDX bits 31 - 24 store code L1 cache size in KBs
+
+	mov eax, edx		; EDX (31:24) - code L1 cache size in KBs
 	shr eax, 24
-	mov rdi, tstring
-	call int_to_string
-	mov rsi, l1ccachemsg
-	call output
-	mov rsi, tstring
-	call output
-	mov rsi, kbmsg
-	call output
-	mov eax, ecx		; ECX bits 31 - 24 store data L1 cache size in KBs
+	mov [l1ccache], eax
+
+	mov eax, ecx		; ECX (31:24) - data L1 cache size in KBs
 	shr eax, 24
+	mov [l1dcache], eax
+
+; L2/L3 cache info
+	mov eax, 0x80000006	; L2/L3 cache info
+	cpuid
+
+	mov eax, ecx		; ECX (31:16) - unified L2 cache size in KBs
+	shr eax, 16
+	mov [l2cache], eax
+
+	mov eax, edx		; EDX (31:18) - unified L3 cache size in 512 KB chunks
+	shr eax, 18
+	and eax, 0x3FFFF	; Clear bits 18 - 31
+	shl eax, 9		; Convert the value for 512 KB chunks to KBs (Multiply by 512)
+	mov [l3cache], eax
+
+cache_done:
+
+	mov eax, [l1dcache]
 	mov rdi, tstring
 	call int_to_string
 	mov rsi, l1dcachemsg
@@ -263,11 +243,17 @@ cache_extended:
 	mov rsi, kbmsg
 	call output
 
-; L2/L3 cache info
-	mov eax, 0x80000006	; L2/L3 cache info
-	cpuid
-	mov eax, ecx		; ecx bits 31 - 16 store unified L2 cache size in KBs
-	shr eax, 16
+	mov eax, [l1ccache]
+	mov rdi, tstring
+	call int_to_string
+	mov rsi, l1ccachemsg
+	call output
+	mov rsi, tstring
+	call output
+	mov rsi, kbmsg
+	call output
+
+	mov eax, [l2cache]
 	mov rdi, tstring
 	call int_to_string
 	mov rsi, l2ucachemsg
@@ -277,10 +263,7 @@ cache_extended:
 	mov rsi, kbmsg
 	call output
 
-	mov eax, edx		; edx bits 31 - 18 store unified L3 cache size in 512 KB chunks
-	shr eax, 18
-	and eax, 0x3FFFF	; Clear bits 18 - 31
-	shl eax, 9		; Convert the value for 512 KB chunks to KBs (Multiply by 512)
+	mov eax, [l3cache]
 	mov rdi, tstring
 	call int_to_string
 	mov rsi, l3ucachemsg
@@ -289,8 +272,6 @@ cache_extended:
 	call output
 	mov rsi, kbmsg
 	call output
-
-cache_done:
 
 ; Address bits
 	mov rsi, physaddrbits
@@ -530,7 +511,7 @@ next_device:
 	mov rsi, pci_classes
 	add rsi, rax
 	call output			; Display Description
-	
+
 	shr eax, 5
 	cmp al, 01
 	je pci_storage
@@ -802,7 +783,14 @@ pci_03_02: db '3D controller                  ', 0
 
 pci_blank: db '                               ', 0
 
+align 16
 hextable: db '0123456789ABCDEF'
 tchar: db 0, 0, 0
 space: db ' ', 0
+
+align 16
+l1dcache: dd 0
+l1ccache: dd 0
+l2cache: dd 0
+l3cache: dd 0
 tstring: times 50 db 0
