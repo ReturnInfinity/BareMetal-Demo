@@ -81,36 +81,43 @@ print_cpu_string:
 	mov rsi, mhzmsg
 	call output
 
+; Gather and display amounts of CPU cache
+; Leaf 0x4 of CPUID is checked first. If 0 is returned in EAX then the extended leaves will be used
+; For Leaf 0x4:
+; ECX (31:0) should contain the number of sets - 1
+; EBX contains Ways - 1 (31:22), Partitions - 1 (21:12), and Line Size - 1 (11:0))
+; Cache bytes = sets * ways * partitions * line size
+; Todo - verify the cache level, EAX(7:5), and cache type, EAX(4:0)
+
 cache_standard:
 
 ; L1D
 	mov eax, 0x00000004
 	xor ecx, ecx
 	cpuid
-	cmp eax, 0
+
+	cmp eax, 0		; If CPUID returned 0 in EAX then try the extended CPUID leaves
 	je cache_extended
-	mov eax, ecx
+	mov eax, ecx		; ECX contains number of sets - 1
 	inc eax
 	mov ecx, ebx
-	and ecx, 0xFFF
-	add ecx, 1
+	and ecx, 0xFFF		; Keep Line Size
+	inc ecx
 	mul ecx
 
 	mov ecx, ebx
 	shr ecx, 12
-	and ecx, 0x3FF
-	cmp ecx, 0
-	jne l1d_skip_partitions
-	add ecx, 1
+	and ecx, 0x3FF		; Keep Partitions
+	inc ecx
 	mul ecx
-l1d_skip_partitions:
 
 	mov ecx, ebx
 	shr ecx, 22
-	and ecx, 0x3FF
-	add ecx, 1
+	and ecx, 0x3FF		; Keep Ways
+	inc ecx
 	mul ecx
-	shr eax, 10
+
+	shr eax, 10		; Quick divide by 1024 to get KiB
 
 	mov rdi, tstring
 	call int_to_string
@@ -126,28 +133,26 @@ l1d_skip_partitions:
 	mov ecx, 0x00000001
 	cpuid
 
-	mov eax, ecx
+	mov eax, ecx		; ECX contains number of sets - 1
 	inc eax
 	mov ecx, ebx
-	and ecx, 0xFFF
-	add ecx, 1
+	and ecx, 0xFFF		; Keep Line Size
+	inc ecx
 	mul ecx
 
 	mov ecx, ebx
 	shr ecx, 12
-	and ecx, 0x3FF
-	cmp ecx, 0
-	jne l1c_skip_partitions
-	add ecx, 1
+	and ecx, 0x3FF		; Keep Partitions
+	inc ecx
 	mul ecx
-l1c_skip_partitions:
 
 	mov ecx, ebx
 	shr ecx, 22
-	and ecx, 0x3FF
-	add ecx, 1
+	and ecx, 0x3FF		; Keep Ways
+	inc ecx
 	mul ecx
-	shr eax, 10
+
+	shr eax, 10		; Quick divide by 1024 to get KiB
 
 	mov rdi, tstring
 	call int_to_string
@@ -166,25 +171,23 @@ l1c_skip_partitions:
 	mov eax, ecx
 	inc eax
 	mov ecx, ebx
-	and ecx, 0xFFF
-	add ecx, 1
+	and ecx, 0xFFF		; Keep Line Size
+	inc ecx
 	mul ecx
 
 	mov ecx, ebx
 	shr ecx, 12
-	and ecx, 0x3FF
-	cmp ecx, 0
-	jne l2u_skip_partitions
-	add ecx, 1
+	and ecx, 0x3FF		; Keep Partitions
+	inc ecx
 	mul ecx
-l2u_skip_partitions:
 
 	mov ecx, ebx
 	shr ecx, 22
-	and ecx, 0x3FF
-	add ecx, 1
+	and ecx, 0x3FF		; Keep Ways
+	inc ecx
 	mul ecx
-	shr eax, 10
+
+	shr eax, 10		; Quick divide by 1024 to get KiB
 
 	mov rdi, tstring
 	call int_to_string
@@ -203,25 +206,23 @@ l2u_skip_partitions:
 	mov eax, ecx
 	inc eax
 	mov ecx, ebx
-	and ecx, 0xFFF
-	add ecx, 1
+	and ecx, 0xFFF		; Keep Line Size
+	inc ecx
 	mul ecx
 
 	mov ecx, ebx
 	shr ecx, 12
-	and ecx, 0x3FF
-	cmp ecx, 0
-	jne l3u_skip_partitions
-	add ecx, 1
+	and ecx, 0x3FF		; Keep Partitions
+	inc ecx
 	mul ecx
-l3u_skip_partitions:
 
 	mov ecx, ebx
 	shr ecx, 22
-	and ecx, 0x3FF
-	add ecx, 1
+	and ecx, 0x3FF		; Keep Ways
+	inc ecx
 	mul ecx
-	shr eax, 10
+
+	shr eax, 10		; Quick divide by 1024 to get KiB
 
 	mov rdi, tstring
 	call int_to_string
