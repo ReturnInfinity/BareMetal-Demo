@@ -465,7 +465,7 @@ stoend:
 ; Bus devices
 	mov rsi, busmessage
 	call output
-	mov rsi, 0x120000		; Bus Table
+	mov rsi, 0x118000		; Bus Table
 next_device:
 	lodsq				; Load first 8 bytes of record
 	cmp ax, 0xFFFF			; End of records?
