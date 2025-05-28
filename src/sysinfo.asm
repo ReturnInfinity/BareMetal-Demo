@@ -507,6 +507,10 @@ next_device:
 
 	mov eax, ebx
 	shr eax, 8			; Code in AL
+	cmp al, 0x13
+	jbe known_class
+	xor eax, eax
+known_class:
 	shl eax, 5			; Quick multiply by 32
 	mov rsi, pci_classes
 	add rsi, rax
