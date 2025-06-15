@@ -89,13 +89,55 @@ systest_net:
 	lea rsi, [rel netteststring]
 	call output
 
+	xor edx, edx
+systest_net_disp:
+	mov rcx, MAC_GET
+	call [b_system]
+	cmp eax, 0
+	je systest_net_disp_done
+	push rax
+	mov al, dl
+	call dump_al
+	lea rsi, [rel space]
+	call output
+	pop rax
+	call dump_rax
+	lea rsi, [rel newline]
+	call output
+	inc edx
+	jmp systest_net_disp
+systest_net_disp_done:
+
+	lea rsi, [rel netteststring2]
+	call output
+
+systest_net_wait_for_input:
+	call [b_input]
+	or al, 00100000b		; Convert to lowercase
+	xor edx, edx
+	cmp al, '0'
+	je systest_net_go
+	inc edx
+	cmp al, '1'
+	je systest_net_go
+	cmp al, 'q'
+	je systest_net_finish
+	jmp systest_net_wait_for_input
+
+systest_net_go:
+	lea rsi, [rel netteststring3]
+	call output
+
 	; Get the host MAC
-	mov rax, [0x110048]		; TODO Get from kernel via API
+	mov rcx, MAC_GET
+	call [b_system]
+
 	lea rdi, [rel source]
 	mov rcx, 6
+	ror rax, 40 
 systest_net_srcmacnext:
 	stosb
-	shr rax, 8
+	rol rax, 8
 	sub rcx, 1
 	cmp rcx, 0
 	jne systest_net_srcmacnext
@@ -131,7 +173,7 @@ systest_net_receive:
 
 	; Output the destination MAC
 	mov rcx, 6
-systest_net_receive_dest:	
+systest_net_receive_dest:
 	lodsb
 	call dump_al
 	sub rcx, 1
@@ -350,7 +392,9 @@ memteststring: db 10, 'Memory Test', 10, 'Starting at 0x', 0
 memteststring2: db ', testing up to ', 0
 memtesterror: db 10, 'Error at ', 0
 memtesterror2: db 10, 'Ending test early', 0
-netteststring: db 10, 'Network Test', 10, 'Press S to send a packet, Q to quit.', 10, 'Received packets will display automatically', 0
+netteststring: db 10, 'Network Test', 10, 'Available interfaces:', 10, 0
+netteststring2: db 10, 'Select interface (or Q to quit): ', 0
+netteststring3: db 10, 'Press S to send a packet, Q to quit.', 10, 'Received packets will display automatically', 0
 nettestsendstring: db 10, 'Sending packet.', 0
 nettestreceivestring: db 10, 'Received packet: ', 0
 stoteststring: db 10, 'Storage Test', 10, 'Starting at sector 0x', 0
