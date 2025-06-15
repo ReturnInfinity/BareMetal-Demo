@@ -125,12 +125,14 @@ systest_net_wait_for_input:
 	jmp systest_net_wait_for_input
 
 systest_net_go:
-	lea rsi, [rel netteststring3]
-	call output
-
 	; Get the host MAC
 	mov rcx, MAC_GET
 	call [b_system]
+	cmp eax, 0
+	je systest_net_wait_for_input
+
+	lea rsi, [rel netteststring3]
+	call output
 
 	lea rdi, [rel source]
 	mov rcx, 6
