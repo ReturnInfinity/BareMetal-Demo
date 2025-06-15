@@ -100,8 +100,24 @@ systest_net_disp:
 	call dump_al
 	lea rsi, [rel space]
 	call output
+	lea rsi, [rel dash]
+	call output
+	lea rsi, [rel space]
+	call output
 	pop rax
-	call dump_rax
+
+	ror rax, 40
+	mov ecx, 5			; Display the first 5 with separators after
+systest_net_disp_MAC:
+	call dump_al
+	lea rsi, [rel macsep]
+	call output
+	rol rax, 8
+	sub ecx, 1
+	test ecx, ecx
+	jnz systest_net_disp_MAC
+	call dump_al			; Display the last
+
 	lea rsi, [rel newline]
 	call output
 	inc edx
@@ -405,6 +421,8 @@ donestring: db 10, 'Done!', 10, 0
 hextable: db '0123456789ABCDEF'
 space: db ' ', 0
 period: db '.', 0
+macsep: db ':', 0
+dash: db '-', 0
 newline: db 10, 0
 outputlock: dq 0
 tchar: db 0, 0, 0
