@@ -705,7 +705,7 @@ dump_al:
 ; -----------------------------------------------------------------------------
 
 
-startmessage: db 10, 'System Information:' ; String falls through to newline
+startmessage: db 'System Information:' ; String falls through to newline
 newline: db 10, 0
 quote: db '"', 0
 cpustringmsg: db 'CPU String: ', 0

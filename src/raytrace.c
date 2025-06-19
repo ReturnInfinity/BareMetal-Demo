@@ -236,7 +236,7 @@ int main() {
 	u8 c;
 	int busy;
 
-	b_output("\nraytrace - First run will be using 1 CPU core\nPress any key to continue", 72);
+	b_output("raytrace - First run will be using 1 CPU core\nPress any key to continue", 71);
 
 	c = 0;
 	do {

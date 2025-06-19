@@ -8,6 +8,6 @@
 
 int main(void)
 {
-	b_output("\nHello, world!", 14);
+	b_output("Hello, world!", 13);
 	return 0;
 }

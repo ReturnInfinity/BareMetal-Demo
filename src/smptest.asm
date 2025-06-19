@@ -88,7 +88,7 @@ dump_al_not_AF:
 	ret
 ; -----------------------------------------------------------------------------
 
-startstring: db 10, 'SMPTest'
+startstring: db 'SMPTest'
 message: db 10, 'Hello from core 0x'
 outputlock: dq 0
 tchar:

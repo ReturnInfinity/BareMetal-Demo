@@ -16,8 +16,8 @@
 
 start:					; Start of program label
 	lea rsi, [rel hello_message]	; Load RSI with the relative memory address of string
-	mov ecx, 14			; Output 14 characters
+	mov ecx, 13			; Output 13 characters
 	call [b_output]			; Print the string that RSI points to
 	ret				; Return to OS
 
-hello_message: db 10, 'Hello, world!', 0
+hello_message: db 'Hello, world!', 0

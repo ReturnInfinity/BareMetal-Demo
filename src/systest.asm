@@ -403,7 +403,7 @@ dump_al:
 
 
 ; Strings
-startstring: db 10, 'SysTest', 10, '========', 10, '1 - SMP Test', 10, '2 - Memory Test', 10, '3 - Network Test', 10, '4 - Storage Test', 10, 'q - Quit', 10, 'Enter selection: ', 0
+startstring: db 'SysTest', 10, '========', 10, '1 - SMP Test', 10, '2 - Memory Test', 10, '3 - Network Test', 10, '4 - Storage Test', 10, 'q - Quit', 10, 'Enter selection: ', 0
 smpteststring: db 10, 'SMP Test', 10, 'A message from each core should be displayed', 0
 smptestmessage: db 10, 'Hello from core 0x', 0
 memteststring: db 10, 'Memory Test', 10, 'Starting at 0x', 0
