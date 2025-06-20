@@ -161,9 +161,8 @@ systest_net_srcmacnext:
 	jne systest_net_srcmacnext
 
 systest_net_main:
-	lea rdi, [rel buffer]
-	call [b_net_rx]
-	cmp cx, 0
+	call [b_net_rx]			; RDI will be set to the address of the packet
+	cmp cx, 0			; Check if data was received
 	jne systest_net_receive
 	call [b_input]
 	or al, 00100000b		; Convert to lowercase
@@ -187,7 +186,7 @@ systest_net_send:
 systest_net_receive:
 	lea rsi, [rel nettestreceivestring]
 	call output
-	lea rsi, [rel buffer]
+	mov rsi, rdi			; RDI holds the address of the packet
 
 	; Output the destination MAC
 	mov rcx, 6
