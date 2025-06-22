@@ -91,7 +91,7 @@ systest_net:
 
 	xor edx, edx
 systest_net_disp:
-	mov rcx, MAC_GET
+	mov rcx, NET_STATUS
 	call [b_system]
 	cmp eax, 0
 	je systest_net_disp_done
