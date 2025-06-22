@@ -160,6 +160,11 @@ systest_net_srcmacnext:
 	cmp rcx, 0
 	jne systest_net_srcmacnext
 
+	mov ecx, 0x31
+	; edx already set
+	mov rax, 0xFFFF800000010000
+	call [b_system]
+
 systest_net_main:
 	call [b_net_rx]			; RDI will be set to the address of the packet
 	cmp cx, 0			; Check if data was received
