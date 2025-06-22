@@ -142,7 +142,7 @@ systest_net_wait_for_input:
 
 systest_net_go:
 	; Get the host MAC
-	mov rcx, MAC_GET
+	mov ecx, NET_STATUS
 	call [b_system]
 	cmp eax, 0
 	je systest_net_wait_for_input
@@ -160,7 +160,7 @@ systest_net_srcmacnext:
 	cmp rcx, 0
 	jne systest_net_srcmacnext
 
-	mov ecx, 0x31
+	mov ecx, NET_CONFIG
 	; edx already set
 	mov rax, 0xFFFF800000010000
 	call [b_system]
