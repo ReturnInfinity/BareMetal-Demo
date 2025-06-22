@@ -91,7 +91,7 @@ systest_net:
 
 	xor edx, edx
 systest_net_disp:
-	mov rcx, MAC_GET
+	mov rcx, NET_STATUS
 	call [b_system]
 	cmp eax, 0
 	je systest_net_disp_done
@@ -142,7 +142,7 @@ systest_net_wait_for_input:
 
 systest_net_go:
 	; Get the host MAC
-	mov rcx, MAC_GET
+	mov ecx, NET_STATUS
 	call [b_system]
 	cmp eax, 0
 	je systest_net_wait_for_input
@@ -160,10 +160,14 @@ systest_net_srcmacnext:
 	cmp rcx, 0
 	jne systest_net_srcmacnext
 
+	mov ecx, NET_CONFIG
+	; edx already set
+	mov rax, 0xFFFF800000200000
+	call [b_system]
+
 systest_net_main:
-	lea rdi, [rel buffer]
-	call [b_net_rx]
-	cmp cx, 0
+	call [b_net_rx]			; RDI will be set to the address of the packet
+	cmp cx, 0			; Check if data was received
 	jne systest_net_receive
 	call [b_input]
 	or al, 00100000b		; Convert to lowercase
@@ -187,7 +191,7 @@ systest_net_send:
 systest_net_receive:
 	lea rsi, [rel nettestreceivestring]
 	call output
-	lea rsi, [rel buffer]
+	mov rsi, rdi			; RDI holds the address of the packet
 
 	; Output the destination MAC
 	mov rcx, 6
