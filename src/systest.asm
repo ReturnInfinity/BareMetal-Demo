@@ -162,7 +162,7 @@ systest_net_srcmacnext:
 
 	mov ecx, NET_CONFIG
 	; edx already set
-	mov rax, 0xFFFF800000010000
+	mov rax, 0xFFFF800000200000
 	call [b_system]
 
 systest_net_main:
