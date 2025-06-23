@@ -467,7 +467,7 @@ u16 checksum_tcp(u8* data, u16 bytes, u16 protocol, u16 length)
 int net_init()
 {
 	u64 val0 = 0, val1 = 0, val2 = 0;
-	val0 = b_system(MAC_GET, val1, val2); // Get the MAC as a u64
+	val0 = b_system(NET_STATUS, val1, val2); // Get the MAC as a u64
 	char * MAC = (void*)&val0;
 
 	src_MAC[0] = MAC[5]; // Get the MAC bytes in the correct order
