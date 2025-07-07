@@ -160,15 +160,25 @@ systest_net_srcmacnext:
 	cmp rcx, 0
 	jne systest_net_srcmacnext
 
+	; Clear counters
+	xor eax, eax
+	mov [0x11a060], rax
+	mov [0x11a070], rax
+	mov r8, [0x11a010]
+	mov eax, [r8+0x04074]
+
 	mov ecx, NET_CONFIG
 	; edx already set
 	mov rax, 0xFFFF800000200000
 	call [b_system]
+	mov r14, 0
+	mov r15, 0
 
 systest_net_main:
 	call [b_net_rx]			; RDI will be set to the address of the packet
 	cmp cx, 0			; Check if data was received
 	jne systest_net_receive
+;	jne systest_netflood
 	call [b_input]
 	or al, 00100000b		; Convert to lowercase
 	cmp al, 's'
@@ -177,7 +187,27 @@ systest_net_main:
 	je systest_net_finish
 	jmp systest_net_main
 
+systest_netflood:
+	mov r14, [rdi+0x10]
+	cmp r14, r15
+	jne systest_netflood_bad
+	inc r15
+	jmp systest_net_main
+
+systest_netflood_bad:
+	int3				; Crash out
+
 systest_net_finish:
+	lea rsi, [rel newline]
+	call output
+	mov rax, [0x11a060]
+	call dump_eax
+	lea rsi, [rel newline]
+	call output
+	mov eax, [r8+0x04074]
+	call dump_eax
+	lea rsi, [rel newline]
+	call output
 	jmp start
 
 systest_net_send:
