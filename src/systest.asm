@@ -160,12 +160,12 @@ systest_net_srcmacnext:
 	cmp rcx, 0
 	jne systest_net_srcmacnext
 
-	; Clear counters
-	xor eax, eax
-	mov [0x11a060], rax
-	mov [0x11a070], rax
-	mov r8, [0x11a010]
-	mov eax, [r8+0x04074]
+;	; Clear counters
+;	xor eax, eax
+;	mov [0x11a060], rax
+;	mov [0x11a070], rax
+;	mov r8, [0x11a010]
+;	mov eax, [r8+0x04074]
 
 	mov ecx, NET_CONFIG
 	; edx already set
@@ -188,26 +188,26 @@ systest_net_main:
 	jmp systest_net_main
 
 systest_netflood:
-	mov r14, [rdi+0x10]
-	cmp r14, r15
-	jne systest_netflood_bad
-	inc r15
+	mov r14, [rdi+0x10]		; Gather the 64-bit counter from the packet
+	cmp r14, r15			; Compare it to the expected value
+	jne systest_netflood_bad	; Jump if the numbers aren't the same
+	inc r15				; Increment for the next expected packet
 	jmp systest_net_main
 
 systest_netflood_bad:
 	int3				; Crash out
 
 systest_net_finish:
-	lea rsi, [rel newline]
-	call output
-	mov rax, [0x11a060]
-	call dump_eax
-	lea rsi, [rel newline]
-	call output
-	mov eax, [r8+0x04074]
-	call dump_eax
-	lea rsi, [rel newline]
-	call output
+;	lea rsi, [rel newline]
+;	call output
+;	mov rax, [0x11a060]
+;	call dump_eax
+;	lea rsi, [rel newline]
+;	call output
+;	mov eax, [r8+0x04074]
+;	call dump_eax
+;	lea rsi, [rel newline]
+;	call output
 	jmp start
 
 systest_net_send:
