@@ -6,7 +6,7 @@
 
 [BITS 64]
 
-%include 'libBareMetal.asm'
+%include "libBareMetal.asm"
 
 start:
 	lea rsi, [rel startstring]
@@ -16,15 +16,15 @@ systest_wait_for_input:
 	call [b_input]
 	or al, 00100000b		; Convert to lowercase
 
-	cmp al, '1'
+	cmp al, "1"
 	je systest_smp
-	cmp al, '2'
+	cmp al, "2"
 	je systest_mem
-	cmp al, '3'
+	cmp al, "3"
 	je systest_net
-	cmp al, '4'
+	cmp al, "4"
 	je systest_sto
-	cmp al, 'q'
+	cmp al, "q"
 	je systest_end
 	jmp systest_wait_for_input
 
@@ -86,7 +86,7 @@ systest_mem_done:
 	jmp start
 
 systest_net:
-	lea rsi, [rel netteststring]
+	lea rsi, [rel netteststring1a]
 	call output
 
 	xor edx, edx
@@ -124,35 +124,32 @@ systest_net_disp_MAC:
 	jmp systest_net_disp
 systest_net_disp_done:
 
-	lea rsi, [rel netteststring2]
+	lea rsi, [rel netteststring1b]
 	call output
 
 systest_net_wait_for_input:
 	call [b_input]
 	or al, 00100000b		; Convert to lowercase
 	xor edx, edx
-	cmp al, '0'
-	je systest_net_go
+	cmp al, "0"
+	je systest_net_test
 	inc edx
-	cmp al, '1'
-	je systest_net_go
-	cmp al, 'q'
+	cmp al, "1"
+	je systest_net_test
+	cmp al, "q"
 	je systest_net_finish
 	jmp systest_net_wait_for_input
 
-systest_net_go:
+systest_net_test:
 	; Get the host MAC
 	mov ecx, NET_STATUS
 	call [b_system]
 	cmp eax, 0
 	je systest_net_wait_for_input
 
-	lea rsi, [rel netteststring3]
-	call output
-
 	lea rdi, [rel source]
 	mov rcx, 6
-	ror rax, 40 
+	ror rax, 40
 systest_net_srcmacnext:
 	stosb
 	rol rax, 8
@@ -161,55 +158,126 @@ systest_net_srcmacnext:
 	jne systest_net_srcmacnext
 
 ;	; Clear counters
-;	xor eax, eax
-;	mov [0x11a060], rax
-;	mov [0x11a070], rax
-;	mov r8, [0x11a010]
-;	mov eax, [r8+0x04074]
+	xor r14, r14			; Packet counter
+	xor r15, r15			; Byte counter
 
+	; Prep buffer for packets
 	mov ecx, NET_CONFIG
-	; edx already set
+	; EDX already set
 	mov rax, 0xFFFF800000200000
 	call [b_system]
-	mov r14, 0
-	mov r15, 0
 
+; Select test type
+	lea rsi, [rel netteststring2]
+	call output
+systest_net_test_wait_for_input:
+	call [b_input]
+	or al, 00100000b		; Convert to lowercase
+	cmp al, "0"
+	je systest_net_main_title
+	cmp al, "1"
+	je systest_net_main_counter_title
+	cmp al, "2"
+	je systest_net_main_netflood_title
+	cmp al, "q"
+	je systest_net_finish
+	jmp systest_net_test_wait_for_input
+
+
+; Main network test. Received packets are displayed. Packets can be sent.
+systest_net_main_title:
+	lea rsi, [rel netteststring3]
+	call output
 systest_net_main:
 	call [b_net_rx]			; RDI will be set to the address of the packet
 	cmp cx, 0			; Check if data was received
 	jne systest_net_receive
-;	jne systest_netflood
 	call [b_input]
 	or al, 00100000b		; Convert to lowercase
-	cmp al, 's'
+	cmp al, "s"
 	je systest_net_send
-	cmp al, 'q'
+	cmp al, "q"
 	je systest_net_finish
 	jmp systest_net_main
 
-systest_netflood:
-	mov r14, [rdi+0x10]		; Gather the 64-bit counter from the packet
-	cmp r14, r15			; Compare it to the expected value
-	jne systest_netflood_bad	; Jump if the numbers aren't the same
-	inc r15				; Increment for the next expected packet
-	jmp systest_net_main
+; Network counter test. Keeps track of packets and bytes received
+systest_net_main_counter_title:
+	lea rsi, [rel netteststring4]
+	call output
+systest_net_main_counter:
+	call [b_net_rx]			; RDI will be set to the address of the packet
+	cmp cx, 0			; Check if data was received
+	jne systest_net_main_counter_inc
+	call [b_input]
+	or al, 00100000b		; Convert to lowercase
+	cmp al, "q"
+	je systest_net_finish
+	jmp systest_net_main_counter
 
-systest_netflood_bad:
-	int3				; Crash out
+systest_net_main_counter_inc:
+	inc r14
+	add r15, rcx
+	jmp systest_net_main_counter
+
+; Network flood test. Keeps track of packets and bytes received
+systest_net_main_netflood_title:
+	lea rsi, [rel netteststring5]
+	call output
+	xor r13, r13
+	xor r12, r12
+systest_net_main_netflood:
+	call [b_input]
+	or al, 00100000b		; Convert to lowercase
+	cmp al, "q"
+	je netflood_clear
+	call [b_net_rx]			; RDI will be set to the address of the packet
+	cmp cx, 0			; Check if data was received
+	je systest_net_main_netflood
+	inc r14
+	add r15, rcx
+	mov r12, [rdi+0x10]		; Get current packet #
+	cmp r12, r13			; Compare to expected value
+	jne netflood_missed		; Not equal, print error
+	inc r13				; Otherwise, increment expected value for next packet
+	jmp systest_net_main_netflood
+
+netflood_missed:
+	lea rsi, [rel nettestflood1]
+	call output
+	mov rax, r13
+	call dump_rax
+	lea rsi, [rel nettestflood2]
+	call output
+	mov rax, r12
+	call dump_rax
+	lea rsi, [rel newline]
+	call output
+	; Remove comments to keep test running
+;	mov r13, r12
+;	jmp systest_net_main_netflood
+
+netflood_clear:
+	call [b_net_rx]			; RDI will be set to the address of the packet
+	cmp cx, 0			; Check if data was received
+	jne netflood_clear
+	jmp systest_net_finish
 
 systest_net_finish:
-;	lea rsi, [rel newline]
-;	call output
-;	mov rax, [0x11a060]
-;	call dump_eax
-;	lea rsi, [rel newline]
-;	call output
-;	mov eax, [r8+0x04074]
-;	call dump_eax
-;	lea rsi, [rel newline]
-;	call output
+	; Output # of packets recevied
+	lea rsi, [rel nettestpackets]
+	call output
+	mov rax, r14
+	call dump_rax
+	; Output # of bytes received
+	lea rsi, [rel nettestbytes]
+	call output
+	mov rax, r15
+	call dump_rax
+	lea rsi, [rel newline]
+	call output
 	jmp start
 
+; Network send
 systest_net_send:
 	lea rsi, [rel nettestsendstring]
 	call output
@@ -218,7 +286,10 @@ systest_net_send:
 	call [b_net_tx]
 	jmp systest_net_main
 
+; Network receive and output
 systest_net_receive:
+	inc r14
+	add r15, rcx
 	lea rsi, [rel nettestreceivestring]
 	call output
 	mov rsi, rdi			; RDI holds the address of the packet
@@ -277,7 +348,7 @@ systest_sto_next:
 	mov rdi, 0xFFFF800000200000	; Test memory
 	mov edx, 0
 	mov ecx, TSC
-systest_sto_create_data:	
+systest_sto_create_data:
 	call [b_system]			; Return TSC in RAX
 	stosq
 	inc edx
@@ -313,7 +384,7 @@ systest_sto_compare:
 	lea rsi, [rel period]
 	call output
 	jmp systest_sto_next
-	
+
 systest_sto_finish:
 	lea rsi, [rel donestring]
 	call output
@@ -437,26 +508,33 @@ dump_al:
 
 
 ; Strings
-startstring: db 'SysTest', 10, '========', 10, '1 - SMP Test', 10, '2 - Memory Test', 10, '3 - Network Test', 10, '4 - Storage Test', 10, 'q - Quit', 10, 'Enter selection: ', 0
-smpteststring: db 10, 'SMP Test', 10, 'A message from each core should be displayed', 0
-smptestmessage: db 10, 'Hello from core 0x', 0
-memteststring: db 10, 'Memory Test', 10, 'Starting at 0x', 0
-memteststring2: db ', testing up to ', 0
-memtesterror: db 10, 'Error at ', 0
-memtesterror2: db 10, 'Ending test early', 0
-netteststring: db 10, 'Network Test', 10, 'Available interfaces:', 10, 0
-netteststring2: db 10, 'Select interface (or Q to quit): ', 0
-netteststring3: db 10, 'Press S to send a packet, Q to quit.', 10, 'Received packets will display automatically', 0
-nettestsendstring: db 10, 'Sending packet.', 0
-nettestreceivestring: db 10, 'Received packet: ', 0
-stoteststring: db 10, 'Storage Test', 10, 'Starting at sector 0x', 0
-stotesterror: db 10, 'Data mismatch!', 0
-donestring: db 10, 'Done!', 10, 0
-hextable: db '0123456789ABCDEF'
-space: db ' ', 0
-period: db '.', 0
-macsep: db ':', 0
-dash: db '-', 0
+startstring: db "SysTest", 10, "========", 10, "1 - SMP Test", 10, "2 - Memory Test", 10, "3 - Network Test", 10, "4 - Storage Test", 10, "q - Quit", 10, "Enter selection: ", 0
+smpteststring: db 10, "SMP Test", 10, "A message from each core should be displayed", 0
+smptestmessage: db 10, "Hello from core 0x", 0
+memteststring: db 10, "Memory Test", 10, "Starting at 0x", 0
+memteststring2: db ", testing up to ", 0
+memtesterror: db 10, "Error at ", 0
+memtesterror2: db 10, "Ending test early", 0
+netteststring1a: db 10, "Network Test", 10, "============", 10, "Available interfaces:", 10, 0
+netteststring1b: db 10, "Select interface (or Q to quit): ", 0
+netteststring2: db 10, "Select type of test", 10, "0 - Display packets", 10, "1 - Count packets/bytes received", 10, "2 - netflood test", 10, " ", 10, "Select network test (or Q to quit): ", 0
+netteststring3: db 10, "Press S to send a packet, Q to quit.", 10, "Received packets will display automatically", 0
+netteststring4: db 10, "Received packets/bytes are being counted", 10, "Press Q to quit.", 0
+netteststring5: db 10, "Received packets/bytes are being inspected", 10, "Press Q to quit.", 0
+nettestsendstring: db 10, "Sending packet.", 0
+nettestreceivestring: db 10, "Received packet: ", 0
+nettestflood1: db 10, "Expected 0x", 0
+nettestflood2: db ", received 0x", 0
+nettestpackets: db 10, "Packets recevied: 0x", 0
+nettestbytes: db 10, "  Bytes recevied: 0x", 0
+stoteststring: db 10, "Storage Test", 10, "Starting at sector 0x", 0
+stotesterror: db 10, "Data mismatch!", 0
+donestring: db 10, "Done!", 10, 0
+hextable: db "0123456789ABCDEF"
+space: db " ", 0
+period: db ".", 0
+macsep: db ":", 0
+dash: db "-", 0
 newline: db 10, 0
 outputlock: dq 0
 tchar: db 0, 0, 0
@@ -467,7 +545,7 @@ packet:
 destination: db 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 source: db 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 type: db 0xAB, 0xBA
-data: db 'This is test data from EthTest for BareMetal'
+data: db "This is test data from EthTest for BareMetal"
 
 align 16
 
