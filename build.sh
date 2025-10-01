@@ -23,8 +23,6 @@ if [ "$(uname)" != "Darwin" ]; then
 	ld -T c.ld -o ../bin/raytrace.app crt0.o raytrace.o libBareMetal.o
 	gcc $CFLAGS -o gavare.o gavare.c
 	ld -T c.ld -o ../bin/gavare.app crt0.o gavare.o libBareMetal.o
-	gcc $CFLAGS -o minIP.o minIP.c
-	ld -T c.ld -o ../bin/minIP.app crt0.o minIP.o libBareMetal.o
 	gcc $CFLAGS -o cube3d.o cube3d.c
 	ld -T c.ld -o ../bin/cube3d.app crt0.o cube3d.o libBareMetal.o
 	gcc $CFLAGS -o color-plasma.o color-plasma.c
