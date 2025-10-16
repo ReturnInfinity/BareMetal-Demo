@@ -6,6 +6,7 @@
 
 [BITS 64]
 [ORG 0xFFFF800000000000]
+DEFAULT ABS
 
 %INCLUDE "libBareMetal.asm"
 
