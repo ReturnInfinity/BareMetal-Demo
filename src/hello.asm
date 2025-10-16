@@ -11,6 +11,7 @@
 ; 4) Return to the OS/CLI
 
 [BITS 64]
+DEFAULT ABS
 
 %INCLUDE "libBareMetal.asm"
 

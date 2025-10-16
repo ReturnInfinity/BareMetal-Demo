@@ -2,6 +2,7 @@
 ; Written by Ian Seyler
 
 [BITS 64]
+DEFAULT ABS
 
 %INCLUDE "libBareMetal.asm"
 

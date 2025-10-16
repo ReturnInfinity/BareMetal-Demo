@@ -5,6 +5,7 @@
 ; nasm systest.asm -o systest.app
 
 [BITS 64]
+DEFAULT ABS
 
 %include "libBareMetal.asm"
 
