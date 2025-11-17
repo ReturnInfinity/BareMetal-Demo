@@ -432,27 +432,27 @@ check_ahci:
 	je ahci_enabled
 	mov rsi, dismessage
 	call output
-	jmp check_ata
+	jmp check_virtio_scsi
 ahci_enabled:
 	mov rsi, enmessage
 	call output
 
-check_ata:
-	mov rsi, atamessage
+check_virtio_scsi:
+	mov rsi, virtioscsimessage
 	call output
-	cmp byte [0x110000 + 0x0208], 4	; Bit 3 set for ATA
-	je ata_enabled
+	cmp byte [0x110000 + 0x0208], 4	; Bit 3 set for Virtio SCSI
+	je virtio_scsi_enabled
 	mov rsi, dismessage
 	call output
 	jmp check_virtio_blk
-ata_enabled:
+virtio_scsi_enabled:
 	mov rsi, enmessage
 	call output
 
 check_virtio_blk:
 	mov rsi, virtioblkmessage
 	call output
-	cmp byte [0x110000 + 0x0208], 8	; Bit 4 set for NVMe
+	cmp byte [0x110000 + 0x0208], 8	; Bit 4 set for Virtio Block
 	je virtioblk_enabled
 	mov rsi, dismessage
 	call output
@@ -738,10 +738,10 @@ avx512: db 'AVX512 ', 0
 x2apic: db 'x2APIC ',0
 memmessage: db 10, 'Free Memory: ', 0
 stomessage: db 10, 'Storage:', 0
-nvmemessage: db 10, 'NVMe - ', 0
-ahcimessage: db 10, 'AHCI - ', 0
-atamessage: db 10, 'ATA  - ', 0
-virtioblkmessage: db 10, 'Virt - ', 0
+nvmemessage: db 10, 'NVMe      - ', 0
+ahcimessage: db 10, 'AHCI      - ', 0
+virtioscsimessage: db 10, 'Virt-SCSI - ', 0
+virtioblkmessage: db 10, 'Virt-Blk  - ', 0
 dismessage: db 'Disabled', 0
 enmessage: db 'Enabled', 0
 busmessage: db 10, 'Bus:', 10, 'Seg  BS DF Vend Dvce CL SC Class Description              Subclass Description           EN', 0
