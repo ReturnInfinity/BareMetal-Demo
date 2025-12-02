@@ -162,12 +162,6 @@ systest_net_srcmacnext:
 	xor r14, r14			; Packet counter
 	xor r15, r15			; Byte counter
 
-	; Prep buffer for packets
-	mov ecx, NET_CONFIG
-	; EDX already set
-	mov rax, 0xFFFF800000200000
-	call [b_system]
-
 ; Select test type
 	lea rsi, [rel netteststring2]
 	call output
