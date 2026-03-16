@@ -5,6 +5,7 @@
 DEFAULT ABS
 
 %INCLUDE "libBareMetal.asm"
+%INCLUDE "lib-ui.asm"
 
 b_user equ 0x0000000000100048
 
@@ -14,8 +15,8 @@ start:					; Start of program label
 	call [b_output]			; Print the string that RSI points to
 
 	mov eax, 0x00FF0000		; Red
-	mov cl, 0x11
-	call [b_user]
+	mov cl, SET_FG
+	call [b_user]		; b_user is set  entry point of ui_api
 	lea rsi, [rel test_message]	; Load RSI with the relative memory address of string
 	mov ecx, 4			; Output 14 characters
 	call [b_output]			; Print the string that RSI points to
@@ -25,7 +26,7 @@ start:					; Start of program label
 	call [b_output]			; Print the string that RSI points to
 	
 	mov eax, 0x0000FF00		; Green
-	mov cl, 0x11
+	mov cl, SET_FG
 	call [b_user]
 	lea rsi, [rel test_message]	; Load RSI with the relative memory address of string
 	mov ecx, 4			; Output 14 characters
@@ -36,23 +37,23 @@ start:					; Start of program label
 	call [b_output]			; Print the string that RSI points to
 	
 	mov eax, 0x000000FF		; Blue
-	mov cl, 0x11
+	mov cl, SET_FG
 	call [b_user]
 	lea rsi, [rel test_message]	; Load RSI with the relative memory address of string
 	mov ecx, 4			; Output 14 characters
 	call [b_output]			; Print the string that RSI points to
 
 	mov eax, 0x00FF00FF
-	mov cl, 0x11
+	mov cl, SET_FG
 	call [b_user]
 	mov eax, 0x0000FF00		; Green
-	mov cl, 0x12
+	mov cl, SET_BG
 	call [b_user]
 	mov ax, 20
-	mov cl, 0x13
+	mov cl, SET_CURSOR_ROW
 	call [b_user]
 	mov ax, 10
-	mov cl, 0x14
+	mov cl, SET_CURSOR_COL
 	call [b_user]
 	lea rsi, [rel test_message]	; Load RSI with the relative memory address of string
 	mov ecx, 4			; Output 14 characters
