@@ -23,7 +23,8 @@ The second run will use all available CPU cores
 
 typedef int i;
 typedef float f;
-u8 *frame_buffer, *cpu_table;
+u8 *frame_buffer;
+u32 *cpu_table;
 u16 X, Y;
 u32 progress = 0;
 u64 next = 1; // For rand()
@@ -229,10 +230,10 @@ void cls()
 
 int main() {
 	frame_buffer = (u8 *)b_system(SCREEN_LFB_GET, 0, 0); // Frame buffer address from kernel
-	cpu_table = (u8 *)0x5100;
+	cpu_table = (u32 *)0x5100;
 	X = b_system(SCREEN_X_GET, 0, 0); // Screen X
 	Y = b_system(SCREEN_Y_GET, 0, 0); // Screen Y
-	u8 tcore;
+	u32 tcore;
 	u8 c;
 	int busy;
 

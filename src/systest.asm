@@ -406,7 +406,7 @@ smp_task:
 	call output
 	mov rcx, SMP_ID			; Get the APIC ID of the CPU
 	call [b_system]
-	call dump_al
+	call dump_eax
 	lea rax, [rel outputlock]
 	mov rcx, SMP_UNLOCK		; Release the mutex
 	call [b_system]
